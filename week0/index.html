@@ -5,67 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나의 첫 웹 페이지</title>
-    <style>
-        header {
-            background-color: #f8fafc;
-            padding: 16px;
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 16px;
-            padding: 0;
-            margin: 0;
-        }
-
-        li a {
-            text-decoration: none;
-            color: #1e293b;
-            font-weight: 500;
-        }
-
-        h1 {
-            font-weight: 700;
-        }
-
-        .description {
-            color: #475569;
-        }
-
-        #page-title {
-            letter-spacing: -0.02em;
-        }
-
-        .learning-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-        }
-
-        .learning-table th,
-        .learning-table td {
-            border: 1px solid #e2e8f0;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .card {
-            width: 320px;
-            max-width: 100%;
-            padding: 24px;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            margin: 16px;
-            box-sizing: border-box;
-        }
-
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 
 <body>
@@ -128,33 +69,11 @@
             </div>
         </section>
         <aside>관련 링크</aside>
+        <button id="start-button" type="button">시작하기</button>
     </main>
     <footer>
         <p>&copy; 2024 나의 웹 페이지</p>
     </footer>
-    <script>
-        const student = {
-            name: "광수",
-            skills: ["HTML", "CSS", "JavaScript"],
-        };
-
-        function printSkills(skills) {
-            for (const skill of skills) {
-                if (skill === "JavaScript") {
-                    console.log(`${skill}: 화면에 동작을 더합니다.`);
-                }
-                else {
-                    console.log(skill);
-                }
-            }
-        }
-
-        console.log(student.name);
-        printSkills(student.skills);
-
-        
-
-    </script>
 </body>
 
 </html>
