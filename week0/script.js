@@ -1,6 +1,15 @@
 const message = document.querySelector("#message");
 const cheerButton = document.querySelector("#cheer-button");
 
+let isFirst = true;
+
 cheerButton.addEventListener("click", function () {
-  message.textContent = "좋아요! 작은 코드부터 직접 바꾸어 봅시다. 🚀";
+  if (isFirst) {
+    message.textContent = "너가 최고야";
+    isFirst = false;
+  } else {
+    message.textContent = "너가 짱이야"
+    isFirst = true;
+  }
 });
+

@@ -40,4 +40,39 @@ button {
 
 button:hover {
   background: #1d4ed8;
+  cursor: pointer;
+}
+
+.pet-image-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pet-image {
+    width: 100%;
+    max-width: 400px;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 16px;
+    }
+    
+    .skills {
+        gap: 4px;
+    }
+    
+    .skill {
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+    
+    button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
 }
