@@ -1,79 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>나의 웹 개발 카드</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="card">
+      <header>
+        <p>WEEK 0</p>
+        <h1>미리의 웹 개발 시작</h1>
+        <p id="message">HTML, CSS, JavaScript를 배우고 있습니다.</p>
+      </header>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 첫 웹 페이지</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-</head>
+      <section>
+        <h2>배우고 싶은 기술</h2>
+        <ul class="skills">
+          <li class="skill">HTML</li>
+          <li class="skill">CSS</li>
+          <li class="skill">JavaScript</li>
+        </ul>
+      </section>
 
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.html">홈</a></li>
-                <li><a href="about.html">소개</a></li>
-                <li><a href="contact.html">연락처</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section>
-            <h1>이번 주 학습 기록</h1>
-            <p>이번 주 동안 배운 내용을 정리해보았습니다.</p>
-            <table class="learning-table">
-                <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>학습 내용</th>
-                        <th>학습 시간</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2026-09-17</td>
-                        <td>HTML 기초</td>
-                        <td>2시간</td>
-                    </tr>
-                    <tr>
-                        <td>2026-09-17</td>
-                        <td>CSS 기초</td>
-                        <td>3시간</td>
-                    </tr>
-                    <tr>
-                        <td>2026-09-17</td>
-                        <td>JavaScript 기초</td>
-                        <td>4시간</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-        <hr>
-        <section>
-            <h1>기술 목록</h1>
-            <div class="cards">
-                <div class="card">
-                    <h2>HTML</h2>
-                    <p class="description">웹 페이지의 구조를 정의하는 마크업 언어입니다.</p>
-                </div>
-                <div class="card">
-                    <h2>CSS</h2>
-                    <p class="description">웹 페이지의 스타일을 정의하는 스타일 시트 언어입니다.</p>
-                </div>
-                <div class="card">
-                    <h2>JavaScript</h2>
-                    <p class="description">웹 페이지에 동적인 기능을 추가하는 프로그래밍 언어입니다.</p>
-                </div>
-            </div>
-        </section>
-        <aside>관련 링크</aside>
-        <button id="start-button" type="button">시작하기</button>
+      <button id="cheer-button" type="button">응원 메시지 보기</button>
     </main>
-    <footer>
-        <p>&copy; 2024 나의 웹 페이지</p>
-    </footer>
-</body>
-
+  </body>
 </html>

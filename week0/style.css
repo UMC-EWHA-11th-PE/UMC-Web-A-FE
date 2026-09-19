@@ -1,59 +1,43 @@
-header {
-    background-color: #f8fafc;
-    padding: 16px;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    gap: 16px;
-    padding: 0;
-    margin: 0;
-}
-
-li a {
-    text-decoration: none;
-    color: #1e293b;
-    font-weight: 500;
-}
-
-h1 {
-    font-weight: 700;
-}
-
-.description {
-    color: #475569;
-}
-
-#page-title {
-    letter-spacing: -0.02em;
-}
-
-.learning-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-}
-
-.learning-table th,
-.learning-table td {
-    border: 1px solid #e2e8f0;
-    padding: 8px;
-    text-align: left;
+body {
+  margin: 0;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .card {
-    width: 320px;
-    max-width: 100%;
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    margin: 16px;
-    box-sizing: border-box;
+  box-sizing: border-box;
+  width: 90%;
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 32px;
+  border: 1px solid #dbeafe;
+  border-radius: 20px;
+  background: #ffffff;
 }
 
-.cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.skill {
+  padding: 6px 10px;
+  border-radius: 16px;
+  background: #dbeafe;
+}
+
+button {
+  margin-top: 16px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+button:hover {
+  background: #1d4ed8;
 }
