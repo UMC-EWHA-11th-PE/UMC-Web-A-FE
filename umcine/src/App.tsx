@@ -10,6 +10,7 @@ import type {Movie} from "./types/movie.ts";
 
 export default function App() {
     const[movieList, setMovieList] = useState<Movie[]>(movies);
+    const[currentPage, setCurrentPage] = useState(1);
 
     function handleToggleBookmark(id:number){
         setMovieList((currentMovies)=>
@@ -22,7 +23,7 @@ export default function App() {
             <main className="app__main">
                 <h1 className="app__title">영화 목록</h1>
                 <MovieGrid movies={movieList} onToggleBookmark={handleToggleBookmark}/>
-                <Pagination currentPage={1} totalPages={5}/>
+                <Pagination currentPage={currentPage} totalPages={5} onPageChange={setCurrentPage}/>
             </main>
             <Footer/>
         </div>
