@@ -1,0 +1,26 @@
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 80px;
+    border-top: 1px solid var(--color-border-default);
+    background: var(--color-bg-surface);
+}
+
+.footer__logo{
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.footer__info{
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.footer__link{
+    color: inherit;
+    text-decoration: underline;
+}

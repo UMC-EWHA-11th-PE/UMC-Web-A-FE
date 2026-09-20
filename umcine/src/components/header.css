@@ -1,0 +1,94 @@
+.topbar{
+    display: flex;
+    padding: 24px 80px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+
+    border-bottom: 1px solid var(--color-border-default);
+    background: var(--color-bg-surface);
+}
+
+.topbar__brand-row{
+    display: flex;
+    align-items: center;
+    gap: 42px;
+}
+
+.topbar__brand{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar__mark{
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 2px solid var(--color-text-primary);
+    border-radius: 8px;
+}
+
+.topbar__mark img{
+    width: 24px;
+    height: 24px;
+}
+
+.topbar__brand-name{
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 900;
+    line-height: normal;
+    letter-spacing: -0.7px;
+}
+
+.topbar__menu{
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.topbar__menu-item{
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.topbar__menu-item--active{
+    color: var(--color-text-primary);
+    text-decoration-line: underline;
+}
+
+.topbar__top-actions{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar__search-button{
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-surface);
+}
+
+.topbar__search-button img{
+    width: 24px;
+    height: 24px;
+}
+
+.topbar__login-button{
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid var(--color-bg-surface);
+    background: var(--color-action-primary);
+    color: var(--color-bg-surface);
+    font-size: 14px;
+    font-weight: 800;
+}
