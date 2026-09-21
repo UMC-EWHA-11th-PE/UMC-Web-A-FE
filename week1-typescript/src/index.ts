@@ -150,8 +150,8 @@ console.log(findMember(2));
 console.log(findMember(999)); // 존재하지 않는 회원 ID를 테스트
 
 const studyHour: number | undefined = 0;
-studyHour || 1; // studyHour가 falsy이면 1로 출력
-studyHour ?? 1; // studyHour가 undefined이면 1로 출력
+console.log(studyHour || 1); // 1
+console.log(studyHour ?? 1); // 0
 
 
 function formatMemberId(input: unknown): string {
