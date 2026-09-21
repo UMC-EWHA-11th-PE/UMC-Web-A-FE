@@ -1,34 +1,30 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
+import "./App.css";
+import Header from "./components/header";
+import MovieGrid from "./components/movie-grid";
+import Footer from "./components/footer";
+import { movies } from "./data/movies";
+import type { Movie } from "./types/movie";
 
-// 1. StudyMode 타입을 "focus" | "break"로 만들기
-type StudyMode = "focus" | "break";
-
-// 2. 기본값이 "focus"인 Context 만들기
-const StudyModeContext = createContext<StudyMode>("focus");
-
-// 3. 자식 컴포넌트에서 useContext 또는 use로 현재 모드 읽기
-function StudyModeStatus() {
-  const studyMode = useContext(StudyModeContext);
-
-  return <p>현재 공부 모드: {studyMode}</p>;  
-}
-
-// 4. 부모의 버튼으로 모드를 바꾸고 자식 화면도 바뀌기
 export default function App() {
-  const [studyMode, setStudyMode] = useState<StudyMode>("focus");
+  const [movieList, setMovieList] = useState<Movie[]>(movies);
 
-  function handleToggleTheme() {
-    setStudyMode((currentMode) =>
-      currentMode === "focus" ? "break" : "focus",
+  const handleToggleBookmark = (id: number) => {
+    setMovieList((prev) =>
+      prev.map((movie) =>
+        movie.id === id ? { ...movie, isBookmarked: !movie.isBookmarked } : movie
+      )
     );
-  }
+  };
 
   return (
-    <StudyModeContext value={studyMode}>
-      <StudyModeStatus />
-      <button onClick={handleToggleTheme}>
-        공부 모드 바꾸기
-      </button>
-    </StudyModeContext>
+    <>
+      <Header />
+      <main className="movie-list">
+        <h1 className="movie-list__title">영화 목록</h1>
+        <MovieGrid movies={movieList} onToggleBookmark={handleToggleBookmark} />
+      </main>
+      <Footer />
+    </>
   );
 }
