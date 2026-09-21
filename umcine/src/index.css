@@ -1,0 +1,3 @@
+:root { --bg:#f5f7fa; --blue:#2563eb; --border:#e5e7eb; --text:#111; --text-sub:#9ca3af; }
+#root { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+
