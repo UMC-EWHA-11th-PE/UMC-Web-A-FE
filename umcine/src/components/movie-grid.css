@@ -1,0 +1,17 @@
+.movie-grid {
+  display: grid;
+
+  grid-template-columns: repeat(5, 1fr);
+
+
+  width: 1280px;
+  height: 1017px;
+  opacity: 1;
+
+  row-gap: 20px;
+  column-gap: 18px;
+
+  list-style: none;
+  box-sizing: border-box;
+}
+

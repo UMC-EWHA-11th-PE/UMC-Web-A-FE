@@ -1,0 +1,15 @@
+.pagination{
+    display: flex;
+    align-items: center;
+
+    width: 1440px;
+    height: 1185px;
+    padding-top: 24px;
+    padding-right: 80px;
+    padding-bottom: 24px;
+    padding-left: 80px;
+    gap: 20px;
+    angle: 0 deg;
+    opacity: 1;
+}
+
