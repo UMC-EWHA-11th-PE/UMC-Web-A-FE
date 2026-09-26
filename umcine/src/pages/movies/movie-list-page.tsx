@@ -1,14 +1,13 @@
-import "./App.css";
-import {movies} from "./data/movie.ts";
-import MovieGrid from "./components/movie-grid.tsx";
-import Header from "./components/header.tsx";
-import Footer from "./components/footer.tsx";
-import Pagination from "./components/pagination.tsx";
+import "../../App.css";
+import {movies} from "../../data/movies.ts";
+import MovieGrid from "../../components/movies/movie-grid.tsx";
+import Footer from "../../components/layout/footer.tsx";
+import Pagination from "../../components/movies/pagination.tsx";
 import {useState} from "react";
-import type {Movie} from "./types/movie.ts";
+import type {Movie} from "../../types/movie.ts";
 
 
-export default function App() {
+export function MovieListPage() {
     const[movieList, setMovieList] = useState<Movie[]>(movies);
     const[currentPage, setCurrentPage] = useState(1);
 
@@ -19,7 +18,6 @@ export default function App() {
     }
     return(
         <div className="app">
-            <Header />
             <main className="app__main">
                 <h1 className="app__title">영화 목록</h1>
                 <MovieGrid movies={movieList} onToggleBookmark={handleToggleBookmark}/>
