@@ -1,6 +1,5 @@
 import type {Movie} from "../../types/movie.ts";
 import MovieCard from "./movie-card.tsx";
-import "../movie-grid.css";
 
 interface MovieGridProps{
     movies: Movie[];
