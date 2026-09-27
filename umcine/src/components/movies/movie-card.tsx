@@ -10,7 +10,7 @@ interface MovieCardProps{
 export default function MovieCard({movie, onToggleBookmark}: MovieCardProps){
     return(
         <article className="flex flex-col items-start gap-1">
-            <div className="relative overflow-hidden h-[274px] self-stretch rounded-[10px] bg-(--color-bg-page)">
+            <div className="relative aspect-2/3 overflow-hidden self-stretch rounded-[10px] bg-(--color-bg-page) xl:aspect-auto xl:h-[274px]">
                 <Link to="/movies/$movieId" params={{movieId:String(movie.id)}} className="block h-full">
                     <img className="h-full w-full object-cover"
                         src={movie.posterPath} alt={`${movie.title} 포스터`}/>

@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer className="flex items-center justify-end gap-2 px-20 py-4 border-t border-solid border-(--color-border-default) bg-(--color-bg-surface)">
+        <footer className="flex items-center justify-end gap-2 px-4 py-4 md:px-20 border-t border-solid border-(--color-border-default) bg-(--color-bg-surface)">
             <img className="size-6 object-contain"
                  src="/images/logos/tmdb-logo.svg"
                  alt="TMDB 로고" />
