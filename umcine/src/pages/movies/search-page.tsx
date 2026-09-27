@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { movies } from "../../data/movies";
 import Footer from "../../components/layout/footer";
 
@@ -7,10 +7,12 @@ export function SearchPage() {
     const { query } = useSearch({ from: "/search" });
     const navigate = useNavigate({ from: "/search" });
     const [searchText, setSearchText] = useState(query ?? "");
+    const [prevQuery, setPrevQuery] = useState(query);
 
-    useEffect(() => {
+    if (query !== prevQuery) {
+        setPrevQuery(query);
         setSearchText(query ?? "");
-    }, [query]);
+    }
 
     const normalizedQuery = query?.trim().toLowerCase() ?? "";
     const searchResults = normalizedQuery
