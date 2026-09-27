@@ -11,8 +11,17 @@ export function Header(){
                     <span className="text-xl font-black tracking-[-0.7px]">UMCine</span>
                 </div>
                 <nav className="flex items-center gap-[30px]">
-                    <Link className="text-sm font-bold text-(--color-text-secondary) no-underline" to="/">영화</Link>
-                    <Link className="text-sm font-bold text-(--color-text-secondary) no-underline" to="/search">검색</Link>
+                    <Link
+                        activeProps={{className:"text-(--color-text-primary) underline"}}
+                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
+                        activeOptions={{ exact: true }}
+                        className="text-sm font-bold"
+                        to="/">영화</Link>
+                    <Link
+                        activeProps={{className:"text-(--color-text-primary) underline"}}
+                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
+                        className="text-sm font-bold"
+                        to="/search">검색</Link>
                     <a className="text-sm font-bold text-(--color-text-secondary) no-underline" href="#">내 정보</a>
                 </nav>
             </div>
