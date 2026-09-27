@@ -1,5 +1,5 @@
 
-import { movies } from "../data/movies";
+import { movies } from "../../data/movies";
 
 
 interface PaginationProps {
@@ -10,9 +10,8 @@ interface PaginationProps {
 
 export function Pagination({currentPage, totalPages, onPageChange} :PaginationProps) {
 
-
   return (
-    <main className="pagination">
+    <main className="flex flex-rows items-center gap-5 w-[1440px] h-[1185px] py-6 px-1">
       <button 
         onClick={() =>
           {((currentPage>0)&&(currentPage<movies.length))? onPageChange(currentPage):onPageChange(currentPage-1)}
