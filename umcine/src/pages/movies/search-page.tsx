@@ -55,7 +55,7 @@ export function SearchPage() {
 
   // 검색어가 있을 때: Figma "영화 검색 결과" 화면 (좌우 80px / 상하 24px 여백)
   return (
-    <main className="flex flex-col gap-6 px-20 py-6">
+    <main className="flex flex-col gap-6 px-4 py-6 sm:px-20">
       <div className="flex flex-col gap-[17px]">
         <h1 className="text-[38px] leading-[44px] font-bold tracking-[-1.71px] text-fg">
           영화 검색
@@ -83,8 +83,8 @@ export function SearchPage() {
             검색 결과가 없어요.
           </p>
         ) : (
-          // Figma: 2열, 열 간격 40px
-          <ul className="grid grid-cols-2 gap-x-10">
+          // Figma: 2열, 열 간격 40px (작은 화면은 1열)
+          <ul className="grid grid-cols-1 gap-x-10 sm:grid-cols-2">
             {searchResults.map((movie) => (
               <li key={movie.id}>
                 <SearchResultCard movie={movie} />

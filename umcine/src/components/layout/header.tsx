@@ -42,12 +42,11 @@ export default function Header() {
         <nav className="flex items-center gap-[30px]">
           <NavLink to="/" active={isMovieActive}>영화</NavLink>
           <NavLink to="/search" active={isSearchActive}>검색</NavLink>
-          <NavLink to="/" active={false}>내 정보</NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-2.5">
-        <button
-          type="button"
+        <Link
+          to="/search"
           aria-label="검색"
           className="flex size-[42px] cursor-pointer items-center justify-center rounded-lg border border-line bg-surface"
         >
@@ -56,7 +55,7 @@ export default function Header() {
             aria-hidden="true"
             className="size-6 bg-fg-secondary mask-[url('/icons/search.svg')] mask-center mask-no-repeat"
           />
-        </button>
+        </Link>
         <button
           type="button"
           className="h-[42px] cursor-pointer rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
