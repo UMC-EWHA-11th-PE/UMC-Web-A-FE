@@ -1,8 +1,6 @@
-import Header from './components/header';
-import MovieGrid from './components/movie-grid';
-import Pagination from './components/pagination';
-import { movies } from './data/movies';
-import './App.css';
+import Header from "./layout/header";
+import "./App.css";
+import MovieListPage from "/Users/songseunghee/Documents/GitHub/UMC-Web-A-FE-ZEN/umcine/src/pages/movies/movie-list-page.tsx";
 
 function App() {
   return (
@@ -10,8 +8,7 @@ function App() {
       <Header />
 
       <main className="app__main">
-        <MovieGrid movies={movies} />
-        <Pagination totalPages={1} />
+        <MovieListPage />
       </main>
 
       <footer className="app__footer">
