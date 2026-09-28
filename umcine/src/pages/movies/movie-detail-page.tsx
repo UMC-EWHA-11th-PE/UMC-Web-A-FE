@@ -1,6 +1,7 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
 import {useState} from "react";
+import Footer from "../../components/layout/footer.tsx";
 
 const ratingScores = [1, 2, 3, 4, 5];
 
@@ -100,6 +101,7 @@ export function MovieDetailPage() {
                     </button>
                 </aside>
             </main>
+            <Footer/>
         </>
     );
 }
