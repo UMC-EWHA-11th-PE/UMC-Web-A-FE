@@ -31,10 +31,19 @@
   position: relative;
 }
 
-.movie-card__poster>img {
+.movie-card__poster > a > img {
   display: block;
   width: 100%;
   height: 274px;
   object-fit: cover;
   border-radius: 12px;
+}
+
+.movie-card__poster > a {
+  display: block;
+}
+
+.movie-card__title a {
+  color: inherit;
+  text-decoration: none;
 }
