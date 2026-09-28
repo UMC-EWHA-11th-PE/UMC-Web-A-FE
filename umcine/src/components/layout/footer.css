@@ -6,7 +6,7 @@
   height: 57px;
   padding: 16px 80px;
   background: #fff;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-line);
   font-size: 12px;
   color: #777;
 }
