@@ -1,0 +1,32 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0 40px;
+}
+
+.pagination__arrow,
+.pagination__page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+}
+
+.pagination__arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination__page--active {
+  background-color: #2f5bea;
+  border-color: #2f5bea;
+  color: #fff;
+  font-weight: 600;
+}
