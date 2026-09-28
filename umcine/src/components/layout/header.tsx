@@ -1,17 +1,18 @@
+import { Link } from "@tanstack/react-router";
 import "./header.css";
 
 export default function Header() {
   return (
     <header className="header">
       <div className="header__left">
-        <a href="/" className="header__logo">
+        <Link to="/" className="header__logo">
           <img src="/icons/movie.svg" alt="" />
           <span>UMCine</span>
-        </a>
+        </Link>
         <nav className="header__nav">
-          <a href="#" className="header__link header__link--active">영화</a>
-          <a href="#" className="header__link">검색</a>
-          <a href="#" className="header__link">내 정보</a>
+          <Link to="/" className="header__link header__link--active">영화</Link>
+          <Link to="/search" className="header__link">검색</Link>
+          <Link to="/" className="header__link">내 정보</Link>
         </nav>
       </div>
       <div className="header__right">
