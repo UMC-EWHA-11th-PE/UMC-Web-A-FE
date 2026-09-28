@@ -70,7 +70,7 @@ export function MovieDetailPage() {
                 <section className="flex-1 space-y-3">
                     <h2 className="text-[21px] font-bold leading-[normal] tracking-[-0.63px]">{movie.tagline}</h2>
                     <p className="text-sm leading-6 text-(--color-text-secondary)">{movie.overview}</p>
-                    <BookmarkButton initialBookmarked={movie.isBookmarked} />
+                    <BookmarkButton key={movie.id} initialBookmarked={movie.isBookmarked} />
                 </section>
 
                 <aside className="w-90 shrink-0 space-y-2 border-l border-(--color-border-default) pl-[30px] pb-[41px]">
