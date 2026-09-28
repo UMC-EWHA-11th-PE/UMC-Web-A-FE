@@ -45,15 +45,15 @@ export function MovieDetailPage() {
                 <img
                     className="absolute inset-0 size-full object-cover"
                     src={movie.backdropPath} alt="" aria-hidden="true" />
-                <div className="absolute inset-0 flex flex-col justify-between items-start px-20 py-6 text-(--color-bg-surface)">
+                <div className="absolute inset-0 flex flex-col justify-between items-start px-4 py-6 md:px-20 text-(--color-bg-surface)">
                     <Link className="flex items-center gap-1 text-[13px] font-bold" to="/">
                         <img className="size-6 invert" src="/icons/movie-icons/chevron-left.svg" alt="" />
                         영화 목록
                     </Link>
                     <div className="max-w-200 space-y-2">
-                        <h1 className="text-[46px] font-bold leading-[49.68px] tracking-[-2.3px]">{movie.title}</h1>
+                        <h1 className="text-[32px] font-bold leading-[36px] tracking-[-1.2px] md:text-[46px] md:leading-[49.68px] md:tracking-[-2.3px]">{movie.title}</h1>
                         <p className="text-sm leading-[normal]">{movie.originalTitle}</p>
-                        <p className="flex gap-2 text-[13px] font-bold leading-[normal]">
+                        <p className="flex flex-wrap gap-x-2 text-[13px] font-bold leading-[normal]">
                             <span>{movie.releaseDate}</span>
                             <span>{movie.genres.join(" · ")}</span>
                             <span>{movie.runtime}</span>
@@ -62,18 +62,18 @@ export function MovieDetailPage() {
                 </div>
             </div>
 
-            <main className="flex items-start gap-8 px-20 py-6">
+            <main className="flex flex-col gap-8 px-4 py-6 md:px-20 lg:flex-row lg:items-start">
                 <div className="w-50 h-71.5 shrink-0 overflow-hidden rounded-[10px] bg-(--color-bg-page) shadow-[0_12px_30px_rgba(12,15,20,0.12)]">
                     <img className="size-full object-cover" src={movie.posterPath} alt={`${movie.title} 포스터`} />
                 </div>
 
-                <section className="flex-1 space-y-3">
+                <section className="min-w-0 flex-1 space-y-3">
                     <h2 className="text-[21px] font-bold leading-[normal] tracking-[-0.63px]">{movie.tagline}</h2>
                     <p className="text-sm leading-6 text-(--color-text-secondary)">{movie.overview}</p>
                     <BookmarkButton key={movie.id} initialBookmarked={movie.isBookmarked} />
                 </section>
 
-                <aside className="w-90 shrink-0 space-y-2 border-l border-(--color-border-default) pl-[30px] pb-[41px]">
+                <aside className="w-full shrink-0 space-y-2 border-t border-(--color-border-default) pt-6 lg:w-90 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-[30px] lg:pb-[41px]">
                     <h2 className="text-[21px] font-bold leading-[normal] tracking-[-0.63px]">내 평점</h2>
                     <p className="text-xs leading-[normal] text-(--color-text-tertiary)">
                         별점은 필수, 후기는 선택이에요.

@@ -33,9 +33,9 @@ export function SearchPage() {
 
     if (!normalizedQuery) {
         return (
-            <main className="flex flex-1 flex-col items-center px-[72px] pt-[209px] pb-[210px]">
+            <main className="flex flex-1 flex-col items-center px-4 py-20 md:px-[72px] md:pt-[209px] md:pb-[210px]">
                 <div className="flex w-full max-w-[790px] flex-col items-center gap-9">
-                    <h1 className="text-[46px] font-bold leading-[52.44px] tracking-[-2.3px]">어떤 영화를 찾고 있나요?</h1>
+                    <h1 className="text-center text-[28px] font-bold leading-[34px] tracking-[-1.2px] md:text-[46px] md:leading-[52.44px] md:tracking-[-2.3px]">어떤 영화를 찾고 있나요?</h1>
                     <form
                         onSubmit={handleSubmit}
                         className="flex h-[74px] items-center gap-[14px] self-stretch rounded-xl border-2 border-(--color-text-primary) bg-(--color-bg-surface) pl-[21px] pr-[17px] shadow-[0_12px_34px_0_rgba(17,19,24,0.08)]"
@@ -44,13 +44,13 @@ export function SearchPage() {
                         <input
                             aria-label="검색어"
                             placeholder="예: 스파이더맨"
-                            className="flex-1 self-stretch bg-transparent px-[2px] py-[1px] text-[17px] leading-[normal] outline-none placeholder:text-(--color-text-tertiary)"
+                            className="min-w-0 flex-1 self-stretch bg-transparent px-[2px] py-[1px] text-[17px] leading-[normal] outline-none placeholder:text-(--color-text-tertiary)"
                             value={searchText}
                             onChange={(event) => setSearchText(event.target.value)}
                         />
                         <button
                             type="submit"
-                            className="flex h-[42px] items-center justify-center rounded-lg border border-(--color-text-primary) bg-(--color-text-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)"
+                            className="flex h-[42px] shrink-0 items-center justify-center rounded-lg border border-(--color-text-primary) bg-(--color-text-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)"
                         >
                             검색
                         </button>
@@ -62,9 +62,9 @@ export function SearchPage() {
 
     return (
         <div className="flex flex-1 flex-col">
-            <main className="flex flex-1 flex-col px-20 py-6">
+            <main className="flex flex-1 flex-col px-4 py-6 md:px-20">
                 <div className="flex flex-col gap-[17px]">
-                    <h1 className="text-[38px] font-bold leading-11 tracking-[-1.71px]">영화 검색</h1>
+                    <h1 className="text-[28px] font-bold leading-[34px] tracking-[-1.2px] md:text-[38px] md:leading-11 md:tracking-[-1.71px]">영화 검색</h1>
                     <form
                         onSubmit={handleSubmit}
                         className="flex h-[54px] items-center gap-[18px] rounded-[9px] border border-(--color-border-default) bg-(--color-bg-surface) pl-[15px] pr-[10px]"
@@ -72,18 +72,18 @@ export function SearchPage() {
                         <img className="size-6" src="/icons/movie-icons/search.svg" alt="" />
                         <input
                             aria-label="검색어"
-                            className="flex-1 self-stretch bg-transparent px-[2px] py-[1px] text-sm font-bold leading-[normal] outline-none"
+                            className="min-w-0 flex-1 self-stretch bg-transparent px-[2px] py-[1px] text-sm font-bold leading-[normal] outline-none"
                             value={searchText}
                             onChange={(event) => setSearchText(event.target.value)}
                         />
                         {searchText && (
-                            <button type="button" aria-label="검색어 지우기" onClick={() => setSearchText("")}>
+                            <button type="button" className="shrink-0" aria-label="검색어 지우기" onClick={() => setSearchText("")}>
                                 <img className="size-6" src="/icons/movie-icons/close.svg" alt="" />
                             </button>
                         )}
                         <button
                             type="submit"
-                            className="flex h-[42px] items-center justify-center rounded-lg border border-(--color-bg-surface) bg-(--color-text-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)"
+                            className="flex h-[42px] shrink-0 items-center justify-center rounded-lg border border-(--color-bg-surface) bg-(--color-text-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)"
                         >
                             다시 검색
                         </button>
@@ -98,7 +98,7 @@ export function SearchPage() {
                 {searchResults.length === 0 ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">검색 결과가 없어요.</p>
                 ) : (
-                    <ul className="grid auto-rows-[240px] grid-cols-2 gap-x-10">
+                    <ul className="grid auto-rows-[240px] grid-cols-1 gap-x-10 lg:grid-cols-2">
                         {searchResults.map((movie) => (
                             <li key={movie.id} className="flex items-start gap-[18px] border-b border-(--color-border-default) py-5">
                                 <Link
