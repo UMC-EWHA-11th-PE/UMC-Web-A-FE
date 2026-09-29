@@ -1,4 +1,4 @@
-import './header.css';
+import { Link } from "@tanstack/react-router";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
@@ -6,33 +6,58 @@ interface HeaderProps {
 
 function Header({ isLoggedIn = false }: HeaderProps) {
   return (
-    <header className="header">
-      <div className="header__left">
-        <a href="/" className="header__logo">
-          <span className="header__logo-icon">🎬</span>
-          UMCine
-        </a>
-        <nav className="header__nav">
-          <a href="/" className="header__nav-link header__nav-link--active">
-            영화
-          </a>
-          <a href="/search" className="header__nav-link">
-            검색
-          </a>
-          <a href="/my" className="header__nav-link">
+    <header className="flex items-center justify-between border-b border-[#e5e5e5] bg-white px-8 py-4">
+      <div className="flex items-center gap-8">
+        <Link
+          to="/"
+          className="flex items-center gap-1.5 text-lg font-bold text-[#111] no-underline"
+        >
+          영화
+        </Link>
+
+        <Link
+          to="/search"
+          className="pb-0.5 text-sm text-[#555] no-underline"
+        >
+          검색
+        </Link>
+
+        <nav className="flex gap-5">
+          <Link
+            to="/my"
+            className="pb-0.5 text-sm text-[#555] no-underline"
+            activeProps={{
+              className: "border-b-2 border-[#111] !font-semibold !text-[#111]",
+            }}
+          >
             내정보
-          </a>
+          </Link>
         </nav>
       </div>
 
-      <div className="header__right">
-        <button className="header__icon-btn" aria-label="검색">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          className="h-9 w-9 cursor-pointer rounded-full border border-[#ddd] bg-white"
+          aria-label="검색"
+        >
           🔍
         </button>
+
         {isLoggedIn ? (
-          <button className="header__cta header__cta--outline">마이페이지</button>
+          <button
+            type="button"
+            className="cursor-pointer rounded-md border border-[#2f5bea] bg-white px-4 py-2 text-sm font-semibold text-[#2f5bea]"
+          >
+            마이페이지
+          </button>
         ) : (
-          <button className="header__cta">로그인</button>
+          <button
+            type="button"
+            className="cursor-pointer rounded-md border-0 bg-[#2f5bea] px-4 py-2 text-sm font-semibold text-white"
+          >
+            로그인
+          </button>
         )}
       </div>
     </header>

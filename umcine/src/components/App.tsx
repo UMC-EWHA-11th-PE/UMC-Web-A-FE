@@ -1,17 +1,14 @@
 import Header from "./layout/header";
-import "./App.css";
-import MovieListPage from "/Users/songseunghee/Documents/GitHub/UMC-Web-A-FE-ZEN/umcine/src/pages/movies/movie-list-page.tsx";
+import MovieListPage from "../pages/movies/movie-list-page";
 
 function App() {
   return (
-    <div className="app">
+    <div className="flex min-h-screen flex-col font-[Pretendard,-apple-system,BlinkMacSystemFont,sans-serif]">
       <Header />
 
-      <main className="app__main">
-        <MovieListPage />
-      </main>
+      <MovieListPage />
 
-      <footer className="app__footer">
+      <footer className="bg-[#f7f7f8] px-0 py-4 text-center text-xs text-[#999]">
         This product uses the TMDB API but is not endorsed or certified by TMDB.
       </footer>
     </div>
