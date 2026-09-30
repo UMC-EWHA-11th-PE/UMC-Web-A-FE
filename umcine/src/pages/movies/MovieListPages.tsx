@@ -1,15 +1,13 @@
-import "./App.css";
 
 import { useState } from "react";
 
-import { Header } from "./components/header";
-import { Pagination } from "./components/pagination";
-import { MovieGrid } from "./components/movie-grid";
-import { movies } from "./data/movies";
+import { Pagination } from "../../components/movies/pagination";
+import { MovieGrid } from "../../components/movies/movie-grid";
+import { movies } from "../../data/movies";
 
 
 
-export default function App() {
+export function MovieListPages() {
   const totalPages = Math.ceil(movies.length/10);
 
 
@@ -23,12 +21,10 @@ export default function App() {
   }
 
 
+
   return (
-    <main className="main">
-      <Header
-        isLoggedIn={true}
-      />
-      <h1>영화 목록</h1>
+    <main className="flex items-center justify-between box-border flex-col items-start w-[1440px] h-auto gap-[30px] px-20 py-6">
+      <h1 className="box-border text-center mt-0 w-[134px] h-11 font-bold text-[38px]/[44px] tracking-[-1.71px] align-middle text-[#17191E]">영화 목록</h1>
 
       <MovieGrid
         movies={movies.slice((pageState-1)*10, ( (pageState*10<movies.length) ? pageState*10 : movies.length)) }
