@@ -1,12 +1,12 @@
 
 import { useState } from "react";
 
-import type { Movie } from "../../types/movie";
+import type { TmdbMovieListItem } from "../../api/movies/models";
 import { MovieCard } from "./movie-card";
 import { readBookmarkIds, saveBookmarkIds } from "../../utils/bookmark-storage";
 
 interface MovieGridProps {
-    movies: Movie[];
+    movies: TmdbMovieListItem[];
 }
 
 export function MovieGrid({movies}:MovieGridProps) {

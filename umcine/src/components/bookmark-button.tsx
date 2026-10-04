@@ -30,17 +30,3 @@ export function BookmarkButton({ movieId, buttonStyle, children }: bookmarkButto
 
 }
 
-
-/*
-            aria-pressed={isBookmarked} 
-            onClick={() =>toggleBookmark(movieId)}
-            className={cn(
-            "absolute right-[10px] top-[10px] flex items-center justify-center box-border w-[34px] h-[34px] rounded-[8px]",
-            isBookmarked ? "bg-[#2563EB] border-blue-100" : "bg-black/60 border border-white",
-            )}
-        >
-            <img 
-            src= {isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
-            className="w-[34px] h-[34px] brightness-0 invert"
-            />
-*/
