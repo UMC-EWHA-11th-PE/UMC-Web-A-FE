@@ -1,36 +1,4 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body,
-h1,
-h2,
-h3,
-p,
-ul{
-  margin: 0;
-}
-
-ul{
-  padding: 0;
-  list-style: none;
-}
-
-button{
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-}
-
-img{
-  display: block;
-  max-width:100%;
-}
+@import "tailwindcss";
 
 :root{
   --color-bg-surface: #ffffff;
