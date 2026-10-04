@@ -1,24 +1,56 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
-import { movies } from "../../data/movies";
+//import { movies } from "../../data/movies";
+import { BookmarkButton } from "../../components/bookmark-button";
+import { searchMovies } from "../../api/movies/search-movies";
+import type { TmdbMovieListItem } from "../../api/movies/models";
+import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
 export function SearchPage() {
+
   const { query } = useSearch({ from: "/search" });
   const navigate = useNavigate({ from: "/search" });
   const [searchText, setSearchText] = useState(query ?? "");
 
+  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+
   useEffect(() => {
+    let ignore = false;
+    const normalizedQuery = query?.trim() ?? "";
+
+    setMovies([]);
+    setErrorMessage(null);
     setSearchText(query ?? "");
+
+    if (!normalizedQuery) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    searchMovies({ query: normalizedQuery })
+      .then((response) => {
+        if (!ignore) setMovies(response.results);
+      })
+      .catch(() => {
+        if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [query]);
 
+
+
   const normalizedQuery = query?.trim().toLowerCase() ?? "";
-  const searchResults = normalizedQuery
-    ? movies.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedQuery) ||
-          movie.originalTitle.toLowerCase().includes(normalizedQuery),
-      )
-    : [];
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,12 +60,26 @@ export function SearchPage() {
     });
   }
 
-  
+  function handleClearSubmit() {
+    setSearchText("");
+  }
+
+
+  if(isLoading){
+    return (
+    <p>영화 목록을 불러오는 중이에요.</p>
+  )}
+
+  if(errorMessage != null){
+    return (
+      <p>{errorMessage}</p>
+    )
+  }
 
 
   if (!normalizedQuery) { 
     return (
-
+      //최초로 검색할 때
       <main className="flex flex-col items-center gap-4 w-[1440px] h-[582px] px-18 pb-[210px] pt-[200px]">
         <h1 className="w-110 h-16 font-bold text-[46px] leading-14 tracking-[-0.023em] font-['Font_5'] align-middle" >어떤 영화를 찾고있나요?</h1>
         <form 
@@ -59,6 +105,7 @@ export function SearchPage() {
 
 
   else{
+    //검색 결과와 함께 출력
     return(
       <main className="felx flex-col w-[1440px] h-[1024px] px-20 py-6">
 
@@ -77,7 +124,7 @@ export function SearchPage() {
               placeholder="예: 스파이더맨"
             />
 
-            <button>
+            <button type="button" onClick={handleClearSubmit}>
               <img src="/icons/close.svg" className="w-6 h-6"/>
             </button>
             <button type="submit" className="w-[86px] h-[42px] px-4 rounded-[8px] border border-[#FFFFFF] bg-[#17191E] font-extrabold text-[14px] leading-none tracking-normal text-center align-middle text-white shrink-0"
@@ -89,29 +136,47 @@ export function SearchPage() {
 
         <div className="flex flex-row items-center justify-between w-auto max-w-[1280px] h-[54px] border-y gab-[1045.8px] border-y-[#E3E6EB]">
           <h2 className="text-[18px] font-bold align-middle text-[#17191E]">‘{query}’ 검색 결과</h2>
-          <p className="text-[12px] font-regular align-middle text-[#969DA8]">영화 {searchResults.length}편</p>
+          <p className="text-[12px] font-regular align-middle text-[#969DA8]">영화 {movies.length}편</p>
         </div>
 
 
-        {searchResults.length === 0 ? (
+        {movies.length === 0 ? (
           <p>검색 결과가 없어요.</p>
         ) : (
           <ul className="grid grid-cols-2 gap-x-0 gap-y-0 w-full">
-            {searchResults.map((movie) => (
+            {movies.map((movie) => (
               <li key={movie.id}
                 className="flex flex-row gap-[18px] w-auto h-[240px] border-b py-[20px] border-b-[#E3E6EB]"
               >
-                <img src={movie.posterPath} alt={`${movie.title} 포스터`} 
-                  className="w-[126px] h-[190px] rounded-[10px] bg-[#F6F7F9]"
-                />
+                <div className="w-[126px] h-[190px] rounded-[10px] bg-[#F6F7F9]">
+                  <img src={getTmdbPosterUrl(movie.poster_path) ?? undefined} alt={`${movie.title} 포스터`} 
+                    className="w-[126px] h-[190px] rounded-[10px] bg-[#F6F7F9]"
+                  />
+                </div>
+
                 
                 <div className="flex flex-col gap-[8px]">
                   <h3 className="text-[18px] font-bold leading-[24.3px] align-middle text-[#17191E]">{movie.title}</h3>
                   <div className="flex flex-row h-[14px] gap-2 items-center font-regular text-3 text-[#969DA8]">
-                    <p>{movie.originalTitle}</p>
-                    <p>{movie.releaseDate}</p>
+                    <p>{movie.original_title}</p>
+                    <p>{movie.release_date}</p>
                   </div>
-                  <p className="text-[12.5px] font-regular leading-[20px] text-[#606774]">{movie.overview}</p>
+                  <p className="w-[476px] line-clamp-4 text-[12.5px] font-regular leading-[20px] text-[#606774]">{movie.overview}</p>
+
+
+                  <BookmarkButton
+                    movieId={movie.id} 
+                    buttonStyle="right-[10px] top-[10px] flex items-center justify-center box-border w-[34px] h-[34px] rounded-[8px]"
+                  >
+                    {(isBookmarked) =>
+                      <img 
+                        src= {isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
+                        className="w-[34px] h-[34px] brightness-0 invert"
+                      />
+                    }
+
+                  </BookmarkButton>
+
 
                   <Link
                     to="/movies/$movieId"
@@ -121,7 +186,6 @@ export function SearchPage() {
                     <p>상세보기</p>
                     <img src="/icons/arrow-right.svg" className="w-4 h-4"/>
                   </Link>
-                    
 
 
                 </div>
