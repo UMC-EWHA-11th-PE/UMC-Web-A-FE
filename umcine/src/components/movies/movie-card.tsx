@@ -1,13 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { cn } from "../../utils/cn";
+import {BookmarkButton} from "../bookmark-button";
 import type { Movie } from "../../types/movie";
 
 interface MovieCardProps {
   movie: Movie;
-  onToggleBookmark: (id: number) => void;
 }
 
-export default function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
+export default function MovieCard({ movie }: MovieCardProps) {
   return (
     // Figma: 포스터 274px + 제목 22px + 날짜 14px, 요소 사이 간격 4px (= 318px)
     <article className="flex flex-col gap-1">
@@ -21,22 +20,7 @@ export default function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
           />
         </Link>
 
-        {/* 북마크 버튼: 34x34, 포스터 오른쪽 위 10px. 북마크 여부에 따라 색이 바뀌어요. */}
-        <button
-          type="button"
-          className={cn(
-            "absolute top-2.5 right-2.5 flex size-[34px] cursor-pointer items-center justify-center rounded-lg border",
-            movie.isBookmarked ? "border-action bg-action" : "border-white bg-fg",
-          )}
-          aria-label={movie.isBookmarked ? "북마크 해제" : "북마크"}
-          onClick={() => onToggleBookmark(movie.id)}
-        >
-          <img
-            src={movie.isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
-            alt=""
-            className="size-6 invert"
-          />
-        </button>
+        <BookmarkButton movieId={movie.id} />
       </div>
 
       {/* 제목: 14px ExtraBold, 위 여백 5px / 날짜: 12px, tertiary 색 */}
