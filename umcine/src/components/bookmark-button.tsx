@@ -1,10 +1,12 @@
-import { useBookmarkStore } from "../stores/bookmark-store";
+import {useBookmarkStore} from "../stores/bookmark-store";
+import {cn} from "../utils/cn.ts";
 
 interface BookmarkButtonProps {
     movieId: number;
+    className?: string;
 }
 
-export function BookmarkButton({ movieId }: BookmarkButtonProps) {
+export function BookmarkButton({movieId, className}: BookmarkButtonProps) {
     const isBookmarked = useBookmarkStore((state) =>
         state.bookmarkedMovieIds.includes(movieId),
     );
@@ -13,8 +15,25 @@ export function BookmarkButton({ movieId }: BookmarkButtonProps) {
     );
 
     return (
-        <button type="button" onClick={() => toggleBookmark(movieId)}>
-            {isBookmarked ? "북마크 해제" : "북마크 추가"}
+        <button
+            type="button"
+            aria-pressed={isBookmarked}
+            onClick={() => toggleBookmark(movieId)}
+            className={cn(
+                "inline-flex items-center gap-2 h-10.5 px-4 rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) text-sm font-extrabold text-(--color-bg-surface)",
+                className,
+            )}
+        >
+            <img
+                className="size-4 invert"
+                src={
+                    isBookmarked
+                        ? "/icons/movie-icons/bookmark.svg"
+                        : "/icons/movie-icons/bookmark-outline.svg"
+                }
+                alt=""
+            />
+            {isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
         </button>
     );
 }
