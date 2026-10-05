@@ -8,7 +8,7 @@ import {cn} from "../../utils/cn.ts";
 
 const cardSizeOptions: { value: CardSize, label: string }[] = [
     {value: "large", label: "크게"},
-    {value: "large", label: "작게"},
+    {value: "small", label: "작게"},
 ]
 
 export function MovieListPage() {
