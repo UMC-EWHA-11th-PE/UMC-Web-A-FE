@@ -1,3 +1,30 @@
-:root { --bg:#f5f7fa; --blue:#2563eb; --border:#e5e7eb; --text:#111; --text-sub:#9ca3af; }
-#root { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+@import "tailwindcss";
 
+/* Figma "Movie Colors" 변수와 폰트를 Tailwind 테마 토큰으로 옮김 */
+@theme {
+  /* color/bg/* */
+  --color-page: #f6f7f9;
+  --color-surface: #ffffff;
+
+  /* color/text/* */
+  --color-fg: #17191e;
+  --color-fg-secondary: #606774;
+  --color-fg-tertiary: #969da8;
+
+  /* color/border/default */
+  --color-line: #e3e6eb;
+
+  /* color/action/* */
+  --color-action: #2563eb;
+  --color-action-hover: #1d4ed8;
+  --color-action-pressed: #1748ad;
+  --color-action-disabled: #d9e5ff;
+
+  /* color/danger/default */
+  --color-danger: #d92d20;
+
+  /* Figma 본문 폰트 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Noto Sans KR", "Apple SD Gothic Neo",
+    sans-serif;
+}
