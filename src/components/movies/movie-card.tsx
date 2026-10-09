@@ -1,9 +1,16 @@
+
 import { Link } from "@tanstack/react-router";
-import type { Movie } from "../../types/movie";
 import { BookmarkButton } from "../bookmark-button";
 
+export interface MovieCardData {
+  id: number;
+  title: string;
+  posterPath: string | null;
+  releaseDate: string;
+}
+
 interface MovieCardProps {
-  movie: Movie;
+  movie: MovieCardData;
 }
 
 export function MovieCard({ movie }: MovieCardProps) {
@@ -14,11 +21,17 @@ export function MovieCard({ movie }: MovieCardProps) {
           to="/movies/$movieId"
           params={{ movieId: String(movie.id) }}
         >
-          <img
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-            className="block w-full"
-          />
+          {movie.posterPath ? (
+            <img
+              src={movie.posterPath}
+              alt={`${movie.title} 포스터`}
+              className="block w-full"
+            />
+          ) : (
+            <div className="flex aspect-[2/3] w-full items-center justify-center bg-gray-200 text-sm text-gray-500">
+              이미지 없음
+            </div>
+          )}
         </Link>
 
         <div className="absolute right-3 top-3">

@@ -1,26 +1,53 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
-import { movies } from "../../data/movies";
+import { searchMovies } from "../../api/movies/search-movies";
+import type { TmdbMovieListItem } from "../../api/movies/models";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
 export function SearchPage() {
-  const { query } = useSearch({ from: "/search" });
+  const { query = "" } = useSearch({ from: "/search" });
   const navigate = useNavigate({ from: "/search" });
   const [searchText, setSearchText] = useState(query ?? "");
+  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setSearchText(query ?? "");
   }, [query]);
 
-  const normalizedQuery = query?.trim().toLowerCase() ?? "";
+  useEffect(() => {
+    let ignore = false;
+    const normalizedQuery = query.trim();
 
-  const searchResults = normalizedQuery
-    ? movies.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedQuery) ||
-          movie.originalTitle.toLowerCase().includes(normalizedQuery),
-      )
-    : [];
+    setMovies([]);
+    setErrorMessage(null);
+
+    if (!normalizedQuery) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    searchMovies({ query: normalizedQuery })
+      .then((response) => {
+        if (!ignore) setMovies(response.results);
+      })
+      .catch(() => {
+        if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [query]);
+
+  const normalizedQuery = query.trim();
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +99,7 @@ export function SearchPage() {
         </h1>
 
         <p className="mb-6 mt-2 text-sm text-gray-500">
-          ‘{query}’ 검색 결과 · 영화 {searchResults.length}편
+          ‘{query}’ 검색 결과 · 영화 {movies.length}편
         </p>
 
         <form
@@ -94,24 +121,39 @@ export function SearchPage() {
           </button>
         </form>
 
-        {searchResults.length === 0 ? (
+        {isLoading ? (
+          <p role="status" className="py-20 text-center text-gray-500">
+            검색 결과를 불러오는 중이에요.
+          </p>
+        ) : errorMessage ? (
+          <p role="alert" className="py-20 text-center text-gray-500">
+            {errorMessage}
+          </p>
+        ) : movies.length === 0 ? (
           <p className="py-20 text-center text-gray-500">
             검색 결과가 없어요.
           </p>
         ) : (
           <ul className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
-            {searchResults.map((movie) => (
+            {movies.map((movie) => (
               <li key={movie.id} className="flex gap-4">
                 <Link
                   to="/movies/$movieId"
                   params={{ movieId: String(movie.id) }}
                   className="shrink-0"
                 >
-                  <img
-                    src={movie.posterPath}
-                    alt={`${movie.title} 포스터`}
-                    className="w-24 rounded-md object-cover"
-                  />
+
+                  {getTmdbPosterUrl(movie.poster_path) ? (
+                    <img
+                      src={getTmdbPosterUrl(movie.poster_path)!}
+                      alt={`${movie.title} 포스터`}
+                      className="w-24 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="flex aspect-[2/3] w-24 items-center justify-center rounded-md bg-gray-200 text-xs text-gray-500">
+                      이미지 없음
+                    </div>
+                  )}
                 </Link>
 
                 <div className="min-w-0">
@@ -125,11 +167,11 @@ export function SearchPage() {
                   </Link>
 
                   <p className="mt-1 text-xs text-gray-500">
-                    {movie.originalTitle}
+                    {movie.original_title}
                   </p>
 
                   <p className="mt-1 text-xs text-gray-500">
-                    {movie.releaseDate}
+                    {movie.release_date}
                   </p>
 
                   <p className="mt-2 line-clamp-3 text-xs leading-5 text-gray-600">

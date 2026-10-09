@@ -1,8 +1,8 @@
-import type { Movie } from "../../types/movie";
 import { MovieCard } from "./movie-card";
+import type { MovieCardData } from "./movie-card";
 
 interface MovieGridProps {
-  movies: Movie[];
+  movies: MovieCardData[];
 }
 
 export function MovieGrid({ movies }: MovieGridProps) {
