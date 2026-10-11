@@ -3,7 +3,7 @@ import { useEffect, useState, type SubmitEvent } from "react";
 import SearchForm from "../../components/movies/search-form";
 import SearchResultCard from "../../components/movies/search-result-card";
 // import { movies } from "../../data/movies";
-import { searchMovies } from "../../api/movies";
+import { searchMovies } from "../../api/movies/search-movies";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 
 export function SearchPage() {
@@ -30,6 +30,7 @@ export function SearchPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     let ignore = false;
 
@@ -58,6 +59,7 @@ export function SearchPage() {
       ignore = true;
     };
   }, [normalizedQuery]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
