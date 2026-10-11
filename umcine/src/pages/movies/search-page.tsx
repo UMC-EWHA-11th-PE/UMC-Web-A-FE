@@ -2,7 +2,9 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import SearchForm from "../../components/movies/search-form";
 import SearchResultCard from "../../components/movies/search-result-card";
-import { movies } from "../../data/movies";
+// import { movies } from "../../data/movies";
+import { searchMovies } from "../../api/movies";
+import type { TmdbMovieListItem } from "../../api/movies/models";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -14,14 +16,49 @@ export function SearchPage() {
     setSearchText(query ?? "");
   }, [query]);
 
-  const normalizedQuery = query?.trim().toLowerCase() ?? "";
+  /* const normalizedQuery = query?.trim().toLowerCase() ?? "";
   const searchResults = normalizedQuery
     ? movies.filter(
         (movie) =>
           movie.title.toLowerCase().includes(normalizedQuery) ||
           movie.originalTitle.toLowerCase().includes(normalizedQuery),
       )
-    : [];
+    : []; */
+
+  const normalizedQuery = query?.trim() ?? "";
+  const [searchResults, setSearchResults] = useState<TmdbMovieListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    setSearchResults([]);
+    setErrorMessage(null);
+
+    if (!normalizedQuery) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    searchMovies({ query: normalizedQuery })
+      .then((response) => {
+        if (!ignore) setSearchResults(response.results);
+      })
+      .catch(() => {
+        if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [normalizedQuery]);
+
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
