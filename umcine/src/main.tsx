@@ -1,6 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+// import './examples/promise-status'
+import './examples/promise-syntax'
 
 // 1. App.tsx 대신 라우터 관련 모듈과 생성된 라우트 트리를 불러옵니다.
 import { RouterProvider, createRouter } from '@tanstack/react-router'
