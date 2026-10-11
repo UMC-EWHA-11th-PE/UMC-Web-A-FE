@@ -1,35 +1,9 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
-import {useState} from "react";
 import Footer from "../../components/layout/footer.tsx";
+import {BookmarkButton} from "../../components/bookmark-button.tsx";
 
 const ratingScores = [1, 2, 3, 4, 5];
-
-interface BookmarkButtonProps {
-    initialBookmarked: boolean;
-}
-
-function BookmarkButton({initialBookmarked}: BookmarkButtonProps) {
-    const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
-
-    return(
-        <button
-            type="button"
-            aria-pressed={isBookmarked}
-            onClick={()=>setIsBookmarked((prev)=>!prev)}
-            className="inline-flex items-center gap-2 h-10.5 px-4 rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) text-sm font-extrabold text-(--color-bg-surface)"
-        >
-            <img className="size-4 invert"
-                 src={
-                    isBookmarked
-                        ?"/icons/movie-icons/bookmark.svg"
-                        : "/icons/movie-icons/bookmark-outline.svg"}
-                 alt="" />
-            {isBookmarked?"즐겨찾기 해제":"즐겨찾기"}
-        </button>
-    );
-}
-
 
 export function MovieDetailPage() {
     const { movieId } = useParams({ from: "/movies/$movieId" });
@@ -70,7 +44,7 @@ export function MovieDetailPage() {
                 <section className="min-w-0 flex-1 space-y-3">
                     <h2 className="text-[21px] font-bold leading-[normal] tracking-[-0.63px]">{movie.tagline}</h2>
                     <p className="text-sm leading-6 text-(--color-text-secondary)">{movie.overview}</p>
-                    <BookmarkButton key={movie.id} initialBookmarked={movie.isBookmarked} />
+                    <BookmarkButton movieId={movie.id} />
                 </section>
 
                 <aside className="w-full shrink-0 space-y-2 border-t border-(--color-border-default) pt-6 lg:w-90 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-[30px] lg:pb-[41px]">
