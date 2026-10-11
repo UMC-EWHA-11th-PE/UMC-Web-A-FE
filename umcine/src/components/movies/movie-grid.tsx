@@ -1,9 +1,9 @@
-import type { Movie } from "../../types/movie";
 import MovieCard from "./movie-card";
 import { useBookmarkStore } from "../../../stores/bookmark-store";
+import type { TmdbMovieListItem } from "../../api/movies/models";
 
 interface MovieGridProps {
-  movies: Movie[];
+  movies: TmdbMovieListItem[];
 }
 
 function MovieGrid({ movies }: MovieGridProps) {

@@ -1,23 +1,31 @@
-import { useState } from 'react';
-
 interface PaginationProps {
+  currentPage: number;
   totalPages: number;
-  onPageChange?: (page: number) => void;
+  onPageChange: (page: number) => void;
 }
 
 const buttonClassName =
-  'min-w-8 h-8 rounded-md border px-2 py-0 text-[13px] cursor-pointer';
+  "min-w-8 h-8 rounded-md border px-2 py-0 text-[13px] cursor-pointer";
 
-const arrowClassName =
-  `${buttonClassName} border-[#ddd] bg-white text-[#333] disabled:opacity-40 disabled:cursor-not-allowed`;
+const arrowClassName = `${buttonClassName} border-[#ddd] bg-white text-[#333] disabled:opacity-40 disabled:cursor-not-allowed`;
 
-function Pagination({ totalPages, onPageChange }: PaginationProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
+  if (totalPages <= 1) return null;
+
+  const startPage = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+
+  const pages = Array.from(
+    { length: Math.min(5, totalPages) },
+    (_, index) => startPage + index,
+  );
 
   const goToPage = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-    onPageChange?.(page);
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    onPageChange(page);
   };
 
   return (
@@ -29,22 +37,22 @@ function Pagination({ totalPages, onPageChange }: PaginationProps) {
         type="button"
         className={arrowClassName}
         onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage === 1}
+        disabled={currentPage <= 1}
       >
         이전
       </button>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      {pages.map((page) => (
         <button
           type="button"
           key={page}
           className={`${buttonClassName} ${
             page === currentPage
-              ? 'border-[#2f5bea] bg-[#2f5bea] font-semibold text-white'
-              : 'border-[#ddd] bg-white text-[#333]'
+              ? "border-[#2f5bea] bg-[#2f5bea] font-semibold text-white"
+              : "border-[#ddd] bg-white text-[#333]"
           }`}
           onClick={() => goToPage(page)}
-          aria-current={page === currentPage ? 'page' : undefined}
+          aria-current={page === currentPage ? "page" : undefined}
         >
           {page}
         </button>
