@@ -110,12 +110,22 @@ export function SearchPage() {
         {/* 검색어와 결과 수: 높이 54px, 위아래 1px 구분선 */}
         <div className="flex h-[54px] items-center justify-between border-y border-line">
           <h2 className="text-lg leading-[21px] font-bold text-fg">‘{query}’ 검색 결과</h2>
-          <span className="text-xs leading-[14px] text-fg-tertiary">
-            영화 {searchResults.length}편
-          </span>
+          {!isLoading && !errorMessage && (
+            <span className="text-xs leading-[14px] text-fg-tertiary">
+              영화 {searchResults.length}편
+            </span>
+          )}
         </div>
 
-        {searchResults.length === 0 ? (
+        {isLoading ? (
+          <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
+            검색 결과를 불러오는 중이에요.
+          </p>
+        ) : errorMessage ? (
+          <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
+            {errorMessage}
+          </p>
+        ) : searchResults.length === 0 ? (
           <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
             검색 결과가 없어요.
           </p>
