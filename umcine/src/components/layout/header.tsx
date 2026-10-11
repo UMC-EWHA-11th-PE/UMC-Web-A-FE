@@ -15,10 +15,7 @@ function Header({ isLoggedIn = false }: HeaderProps) {
           영화
         </Link>
 
-        <Link
-          to="/search"
-          className="pb-0.5 text-sm text-[#555] no-underline"
-        >
+        <Link to="/search" className="pb-0.5 text-sm text-[#555] no-underline">
           검색
         </Link>
 
@@ -54,7 +51,7 @@ function Header({ isLoggedIn = false }: HeaderProps) {
         ) : (
           <button
             type="button"
-            className="cursor-pointer rounded-md border-0 bg-[#2f5bea] px-4 py-2 text-sm font-semibold text-white"
+            className="cursor-pointer rounded-md border-0 bg-black px-4 py-2 text-sm font-semibold text-white"
           >
             로그인
           </button>

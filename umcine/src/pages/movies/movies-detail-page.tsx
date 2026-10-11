@@ -1,24 +1,72 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
-import { movies } from "../../data/movies";
+import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import type { TmdbMovieDetail } from "../../api/movies/models";
 import { useBookmarkStore } from "../../../stores/bookmark-store";
 
 export function MovieDetailPage() {
   const { movieId } = useParams({ from: "/movies/$movieId" });
-  const id = Number(movieId);
+  const parsedMovieId = Number(movieId);
+  const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
+
+  const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(id),
+    state.bookmarkedMovieIds.includes(parsedMovieId),
   );
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
 
-  const movie = movies.find((item) => item.id === id);
+  useEffect(() => {
+    let ignore = false;
 
-  if (!movie) {
+    async function loadMovie() {
+      if (!isValidMovieId) {
+        setMovie(null);
+        setErrorMessage("올바르지 않은 영화 번호예요.");
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage(null);
+      setMovie(null);
+
+      try {
+        const response = await getMovieDetail(parsedMovieId);
+
+        if (!ignore) {
+          setMovie(response);
+        }
+      } catch {
+        if (!ignore) {
+          setErrorMessage("영화 정보를 불러오지 못했어요.");
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadMovie();
+
+    return () => {
+      ignore = true;
+    };
+  }, [parsedMovieId, isValidMovieId]);
+
+  const statusMessage = !isValidMovieId
+    ? "올바르지 않은 영화 번호예요."
+    : isLoading
+      ? "불러오는 중이에요."
+      : (errorMessage ?? (!movie ? "영화를 찾을 수 없어요." : null));
+
+  if (statusMessage || !movie) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-5 bg-[#f7f7f8] px-5 py-24">
-        <h1 className="text-xl font-bold text-[#111]">
-          영화를 찾을 수 없어요.
-        </h1>
+        <h1 className="text-xl font-bold text-[#111]">{statusMessage}</h1>
 
         <Link
           to="/"
@@ -32,12 +80,14 @@ export function MovieDetailPage() {
 
   return (
     <main className="relative isolate flex-1 overflow-hidden bg-[#111827] text-white">
-      <img
-        src={movie.backdropPath}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 -z-20 h-full w-full object-cover"
-      />
+      {movie.backdrop_path && (
+        <img
+          src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+      )}
 
       <div
         aria-hidden="true"
@@ -54,11 +104,17 @@ export function MovieDetailPage() {
         </Link>
 
         <div className="mt-8 flex flex-col gap-8 sm:mt-12 sm:flex-row sm:items-start sm:gap-10 lg:gap-14">
-          <img
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-            className="aspect-[2/3] w-48 shrink-0 self-center rounded-xl bg-white/10 object-cover shadow-2xl sm:w-56 sm:self-start lg:w-72"
-          />
+          {movie.poster_path ? (
+            <img
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              alt={`${movie.title} 포스터`}
+              className="aspect-[2/3] w-48 shrink-0 self-center rounded-xl bg-white/10 object-cover shadow-2xl sm:w-56 sm:self-start lg:w-72"
+            />
+          ) : (
+            <div className="flex aspect-[2/3] w-48 shrink-0 items-center justify-center self-center rounded-xl bg-white/10 text-white/60 sm:w-56 sm:self-start lg:w-72">
+              포스터가 없어요.
+            </div>
+          )}
 
           <div className="min-w-0 flex-1 sm:py-3">
             <h1 className="break-words text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
@@ -66,8 +122,9 @@ export function MovieDetailPage() {
             </h1>
 
             <p className="mt-3 text-base text-white/60 sm:text-lg">
-              {movie.originalTitle}
+              {movie.original_title}
             </p>
+
             <button
               type="button"
               aria-pressed={isBookmarked}
@@ -84,10 +141,10 @@ export function MovieDetailPage() {
             <div className="mt-6 flex flex-wrap gap-2">
               {movie.genres.map((genre) => (
                 <span
-                  key={genre}
+                  key={genre.id}
                   className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
                 >
-                  {genre}
+                  {genre.name}
                 </span>
               ))}
             </div>
@@ -95,22 +152,30 @@ export function MovieDetailPage() {
             <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4 text-sm">
               <div>
                 <dt className="text-white/50">개봉일</dt>
-                <dd className="mt-1 font-medium">{movie.releaseDate}</dd>
+                <dd className="mt-1 font-medium">
+                  {movie.release_date || "정보 없음"}
+                </dd>
               </div>
 
               <div>
                 <dt className="text-white/50">상영 시간</dt>
-                <dd className="mt-1 font-medium">{movie.runtime}</dd>
+                <dd className="mt-1 font-medium">
+                  {movie.runtime != null && movie.runtime > 0
+                    ? `${movie.runtime}분`
+                    : "정보 없음"}
+                </dd>
               </div>
             </dl>
 
             <section className="mt-8 border-t border-white/15 pt-8">
-              <h2 className="text-xl font-semibold leading-relaxed text-white sm:text-2xl">
-                {movie.tagline}
-              </h2>
+              {movie.tagline && (
+                <h2 className="text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+                  {movie.tagline}
+                </h2>
+              )}
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/75 sm:text-base sm:leading-8">
-                {movie.overview}
+                {movie.overview || "등록된 줄거리가 없어요."}
               </p>
             </section>
           </div>
