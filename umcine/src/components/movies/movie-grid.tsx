@@ -1,4 +1,3 @@
-// import type { Movie } from "../../types/movie";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import MovieCard from "./movie-card";
 

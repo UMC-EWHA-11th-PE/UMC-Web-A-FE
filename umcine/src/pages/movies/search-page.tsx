@@ -2,7 +2,6 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import SearchForm from "../../components/movies/search-form";
 import SearchResultCard from "../../components/movies/search-result-card";
-// import { movies } from "../../data/movies";
 import { searchMovies } from "../../api/movies/search-movies";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 
@@ -15,15 +14,6 @@ export function SearchPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchText(query ?? "");
   }, [query]);
-
-  /* const normalizedQuery = query?.trim().toLowerCase() ?? "";
-  const searchResults = normalizedQuery
-    ? movies.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedQuery) ||
-          movie.originalTitle.toLowerCase().includes(normalizedQuery),
-      )
-    : []; */
 
   const normalizedQuery = query?.trim() ?? "";
   const [searchResults, setSearchResults] = useState<TmdbMovieListItem[]>([]);
