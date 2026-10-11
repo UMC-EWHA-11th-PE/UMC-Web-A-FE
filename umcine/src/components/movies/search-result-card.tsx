@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Movie } from "../../types/movie";
+import { BookmarkButton } from "../bookmark-button";
 
 interface SearchResultCardProps {
   movie: Movie;
@@ -10,17 +11,21 @@ export default function SearchResultCard({ movie }: SearchResultCardProps) {
     // Figma: 카드 높이 240px, 위아래 여백 20px, 포스터와 글 사이 18px, 아래 구분선 1px
     <article className="flex h-full min-h-60 gap-[18px] border-b border-line py-5">
       {/* 포스터: 126x190, radius 10px, 이미지가 뜨기 전에는 page 색 */}
-      <Link
-        to="/movies/$movieId"
-        params={{ movieId: String(movie.id) }}
-        className="block h-[190px] w-[126px] shrink-0 overflow-hidden rounded-[10px] bg-page"
-      >
-        <img
-          src={movie.posterPath}
-          alt={`${movie.title} 포스터`}
-          className="size-full object-cover"
-        />
-      </Link>
+      <div className="relative shrink-0">
+        <Link
+          to="/movies/$movieId"
+          params={{ movieId: String(movie.id) }}
+          className="block h-[190px] w-[126px] overflow-hidden rounded-[10px] bg-page"
+        >
+          <img
+            src={movie.posterPath}
+            alt={`${movie.title} 포스터`}
+            className="size-full object-cover"
+          />
+        </Link>
+
+        <BookmarkButton movieId={movie.id} />
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2 pt-1">
         {/* 제목: 18px Bold, line-height 24.3px(=1.35) */}
