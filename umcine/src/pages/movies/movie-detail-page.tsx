@@ -1,10 +1,10 @@
 import {Link, useParams} from "@tanstack/react-router";
 import Footer from "../../components/layout/footer.tsx";
 import {BookmarkButton} from "../../components/bookmark-button.tsx";
-import {getMovieDetail} from "../../api/movies/get-movie-detail";
 import {getTmdbBackdropUrl, getTmdbPosterUrl} from "../../utils/movies/tmdb-image";
 import {useQuery} from "@tanstack/react-query";
 import {getMovieDetailErrorMessage} from "../../utils/movies/get-movie-detail-error-message.ts";
+import {movieQueries} from "../../api/movies/movie-queries.ts";
 
 const ratingScores = [1, 2, 3, 4, 5];
 
@@ -22,10 +22,8 @@ export function MovieDetailPage() {
     const isValidMovieId = Number.isSafeInteger(parsedMovieId) && parsedMovieId > 0;
 
     const movieDetailQuery = useQuery({
-        queryKey: ["movies", "detail", parsedMovieId],
-        queryFn: () => getMovieDetail(parsedMovieId),
+        ...movieQueries.detail(parsedMovieId),
         enabled: isValidMovieId,
-        staleTime: 30*1000,
     })
 
     if (!isValidMovieId) {
@@ -37,7 +35,8 @@ export function MovieDetailPage() {
     }
 
     if (movieDetailQuery.isError) {
-        return <main className="px-4 py-20 text-center md:px-20">{getMovieDetailErrorMessage(movieDetailQuery.error)}</main>;
+        return <main
+            className="px-4 py-20 text-center md:px-20">{getMovieDetailErrorMessage(movieDetailQuery.error)}</main>;
     }
 
     const movie = movieDetailQuery.data;

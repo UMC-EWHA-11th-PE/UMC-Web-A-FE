@@ -1,11 +1,11 @@
 import MovieGrid from "../../components/movies/movie-grid.tsx";
 import Footer from "../../components/layout/footer.tsx";
 import Pagination from "../../components/movies/pagination.tsx";
-import {useViewSettingsStore, type CardSize} from "../../stores/view-settings-store.ts";
+import {type CardSize, useViewSettingsStore} from "../../stores/view-settings-store.ts";
 import {cn} from "../../utils/cn.ts";
-import {getMovies} from "../../api/movies/get-movies.ts";
 import {useQuery} from "@tanstack/react-query";
 import {useState} from "react";
+import {movieQueries} from "../../api/movies/movie-queries.ts";
 
 const cardSizeOptions: { value: CardSize, label: string }[] = [
     {value: "large", label: "크게"},
@@ -17,10 +17,7 @@ const MAX_VISIBLE_PAGES = 5;
 export function MovieListPage() {
     const [page, setPage] = useState(1);
 
-    const moviesQuery = useQuery({
-        queryKey: ["movies", "list", {page}],
-        queryFn: () => getMovies({page}),
-    });
+    const moviesQuery = useQuery(movieQueries.list(page));
 
     const movies = moviesQuery.data?.results ?? [];
     const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, MAX_VISIBLE_PAGES)
