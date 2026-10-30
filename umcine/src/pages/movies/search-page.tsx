@@ -17,6 +17,7 @@ export function SearchPage() {
     }
 
     const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
+    const [totalResults, setTotalResults] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const normalizedQuery = query?.trim() ?? "";
@@ -26,6 +27,7 @@ export function SearchPage() {
 
         async function loadSearchResults() {
             setMovies([]);
+            setTotalResults(0);
             setErrorMessage(null);
 
             if (!normalizedQuery) {
@@ -37,7 +39,10 @@ export function SearchPage() {
 
             await searchMovies({ query: normalizedQuery })
                 .then((response) => {
-                    if (!ignore) setMovies(response.results);
+                    if (!ignore) {
+                        setMovies(response.results);
+                        setTotalResults(response.total_results);
+                    }
                 })
                 .catch(() => {
                     if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
@@ -123,7 +128,9 @@ export function SearchPage() {
 
                 <div className="flex h-[54px] items-center justify-between border-y border-(--color-border-default)">
                     <h2 className="text-lg font-bold leading-[normal]">‘{query}’ 검색 결과</h2>
-                    <p className="text-xs leading-[normal] text-(--color-text-tertiary)">영화 {movies.length}편</p>
+                    {!isLoading && !errorMessage && (
+                        <p className="text-xs leading-[normal] text-(--color-text-tertiary)">영화 {totalResults}편</p>
+                    )}
                 </div>
 
                 {isLoading ? (

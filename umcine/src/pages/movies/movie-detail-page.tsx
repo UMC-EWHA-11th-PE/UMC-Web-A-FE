@@ -18,8 +18,9 @@ function formatRuntime(runtime: number | null) {
 
 export function MovieDetailPage() {
     const { movieId } = useParams({ from: "/movies/$movieId" });
-    const parsedMovieId = Number(movieId);
-    const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
+    const isDecimalId = /^\d+$/.test(movieId);
+    const parsedMovieId = isDecimalId ? Number(movieId) : NaN;
+    const isValidMovieId = Number.isSafeInteger(parsedMovieId) && parsedMovieId > 0;
 
     const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);

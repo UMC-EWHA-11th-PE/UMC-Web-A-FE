@@ -12,8 +12,11 @@ const cardSizeOptions: { value: CardSize, label: string }[] = [
     {value: "small", label: "작게"},
 ]
 
+const MAX_VISIBLE_PAGES = 5;
+
 export function MovieListPage() {
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -26,8 +29,11 @@ export function MovieListPage() {
             setErrorMessage(null);
 
             try {
-                const response = await getMovies({page: 1});
-                if (!ignore) setMovies(response.results);
+                const response = await getMovies({page: currentPage});
+                if (!ignore) {
+                    setMovies(response.results);
+                    setTotalPages(Math.min(response.total_pages, MAX_VISIBLE_PAGES));
+                }
             } catch {
                 if (!ignore) setErrorMessage("영화 목록을 불러오지 못했어요.");
             } finally {
@@ -40,7 +46,7 @@ export function MovieListPage() {
         return () => {
             ignore = true;
         };
-    }, []);
+    }, [currentPage]);
 
     const cardSize = useViewSettingsStore((state) => state.cardSize);
     const setCardSize = useViewSettingsStore((state) => state.setCardSize);
@@ -78,7 +84,7 @@ export function MovieListPage() {
                 ) : (
                     <MovieGrid movies={movies}/>
                 )}
-                <Pagination currentPage={currentPage} totalPages={5} onPageChange={setCurrentPage}/>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
             </main>
             <Footer/>
         </div>
