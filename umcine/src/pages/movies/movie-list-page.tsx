@@ -1,11 +1,11 @@
 import MovieGrid from "../../components/movies/movie-grid.tsx";
 import Footer from "../../components/layout/footer.tsx";
 import Pagination from "../../components/movies/pagination.tsx";
-import {useViewSettingsStore, type CardSize} from "../../stores/view-settings-store.ts";
+import {type CardSize, useViewSettingsStore} from "../../stores/view-settings-store.ts";
 import {cn} from "../../utils/cn.ts";
-import {useEffect, useState} from "react";
-import {getMovies} from "../../api/movies/get-movies.ts";
-import type {TmdbMovieListItem} from "../../api/movies/models.ts";
+import {useQuery} from "@tanstack/react-query";
+import {useState} from "react";
+import {movieQueries} from "../../api/movies/movie-queries.ts";
 
 const cardSizeOptions: { value: CardSize, label: string }[] = [
     {value: "large", label: "크게"},
@@ -15,38 +15,16 @@ const cardSizeOptions: { value: CardSize, label: string }[] = [
 const MAX_VISIBLE_PAGES = 5;
 
 export function MovieListPage() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
 
-    useEffect(() => {
-        let ignore = false;
+    const moviesQuery = useQuery(movieQueries.list(page));
 
-        async function loadMovies() {
-            setIsLoading(true);
-            setErrorMessage(null);
+    const movies = moviesQuery.data?.results ?? [];
+    const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, MAX_VISIBLE_PAGES)
 
-            try {
-                const response = await getMovies({page: currentPage});
-                if (!ignore) {
-                    setMovies(response.results);
-                    setTotalPages(Math.min(response.total_pages, MAX_VISIBLE_PAGES));
-                }
-            } catch {
-                if (!ignore) setErrorMessage("영화 목록을 불러오지 못했어요.");
-            } finally {
-                if (!ignore) setIsLoading(false);
-            }
-        }
-
-        loadMovies();
-
-        return () => {
-            ignore = true;
-        };
-    }, [currentPage]);
+    const handlePageChange = (nextPage: number) => {
+        setPage(nextPage);
+    }
 
     const cardSize = useViewSettingsStore((state) => state.cardSize);
     const setCardSize = useViewSettingsStore((state) => state.setCardSize);
@@ -75,16 +53,16 @@ export function MovieListPage() {
                         ))}
                     </div>
                 </div>
-                {isLoading ? (
+                {moviesQuery.isPending ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오는 중이에요.</p>
-                ) : errorMessage ? (
-                    <p className="py-20 text-center text-sm text-(--color-text-secondary)">{errorMessage}</p>
+                ) : moviesQuery.isError ? (
+                    <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오지 못했어요.</p>
                 ) : movies.length === 0 ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">조건에 맞는 영화가 없어요.</p>
                 ) : (
                     <MovieGrid movies={movies}/>
                 )}
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/>
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange}/>
             </main>
             <Footer/>
         </div>
