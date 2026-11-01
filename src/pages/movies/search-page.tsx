@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, type SubmitEvent } from "react";
 import { searchMovies } from "../../api/movies/search-movies";
-import type { TmdbMovieListItem } from "../../api/movies/models";
 import { BookmarkButton } from "../../components/bookmark-button";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
@@ -9,45 +9,20 @@ export function SearchPage() {
   const { query = "" } = useSearch({ from: "/search" });
   const navigate = useNavigate({ from: "/search" });
   const [searchText, setSearchText] = useState(query ?? "");
-  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setSearchText(query ?? "");
   }, [query]);
 
-  useEffect(() => {
-    let ignore = false;
-    const normalizedQuery = query.trim();
-
-    setMovies([]);
-    setErrorMessage(null);
-
-    if (!normalizedQuery) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    searchMovies({ query: normalizedQuery })
-      .then((response) => {
-        if (!ignore) setMovies(response.results);
-      })
-      .catch(() => {
-        if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [query]);
-
   const normalizedQuery = query.trim();
+
+  const searchQuery = useQuery({
+    queryKey: ["movies", "search", { query: normalizedQuery }],
+    queryFn: () => searchMovies({ query: normalizedQuery }),
+    enabled: normalizedQuery.length > 0,
+  });
+
+  const searchResults = searchQuery.data?.results ?? [];
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,7 +74,7 @@ export function SearchPage() {
         </h1>
 
         <p className="mb-6 mt-2 text-sm text-gray-500">
-          ‘{query}’ 검색 결과 · 영화 {movies.length}편
+          ‘{query}’ 검색 결과 · 영화 {searchResults.length}편
         </p>
 
         <form
@@ -121,28 +96,27 @@ export function SearchPage() {
           </button>
         </form>
 
-        {isLoading ? (
+        {searchQuery.isLoading ? (
           <p role="status" className="py-20 text-center text-gray-500">
             검색 결과를 불러오는 중이에요.
           </p>
-        ) : errorMessage ? (
+        ) : searchQuery.isError ? (
           <p role="alert" className="py-20 text-center text-gray-500">
-            {errorMessage}
+            {searchQuery.error.message}
           </p>
-        ) : movies.length === 0 ? (
+        ) : searchQuery.isSuccess && searchResults.length === 0 ? (
           <p className="py-20 text-center text-gray-500">
             검색 결과가 없어요.
           </p>
         ) : (
           <ul className="grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
-            {movies.map((movie) => (
+            {searchResults.map((movie) => (
               <li key={movie.id} className="flex gap-4">
                 <Link
                   to="/movies/$movieId"
                   params={{ movieId: String(movie.id) }}
                   className="shrink-0"
                 >
-
                   {getTmdbPosterUrl(movie.poster_path) ? (
                     <img
                       src={getTmdbPosterUrl(movie.poster_path)!}
