@@ -1,27 +1,36 @@
 import { Link } from "@tanstack/react-router";
-import type { Movie } from "../../types/movie";
+import type { TmdbMovieListItem } from "../../api/movies/models";
+import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 import { BookmarkButton } from "../bookmark-button";
 
 interface SearchResultCardProps {
-  movie: Movie;
+  movie: TmdbMovieListItem;
 }
 
 export default function SearchResultCard({ movie }: SearchResultCardProps) {
+  const posterUrl = getTmdbPosterUrl(movie.poster_path);
+
   return (
     // Figma: 카드 높이 240px, 위아래 여백 20px, 포스터와 글 사이 18px, 아래 구분선 1px
     <article className="flex h-full min-h-60 gap-[18px] border-b border-line py-5">
-      {/* 포스터: 126x190, radius 10px, 이미지가 뜨기 전에는 page 색 */}
+      {/* 포스터: 126x190, radius 10px, 포스터가 없으면 같은 크기의 빈 영역 */}
       <div className="relative shrink-0">
         <Link
           to="/movies/$movieId"
           params={{ movieId: String(movie.id) }}
           className="block h-[190px] w-[126px] overflow-hidden rounded-[10px] bg-page"
         >
-          <img
-            src={movie.posterPath}
-            alt={`${movie.title} 포스터`}
-            className="size-full object-cover"
-          />
+          {posterUrl ? (
+            <img
+              src={posterUrl}
+              alt={`${movie.title} 포스터`}
+              className="size-full object-cover"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center text-xs text-fg-tertiary">
+              이미지 없음
+            </div>
+          )}
         </Link>
 
         <BookmarkButton movieId={movie.id} />
@@ -33,8 +42,8 @@ export default function SearchResultCard({ movie }: SearchResultCardProps) {
 
         {/* 원제·개봉일: 12px, tertiary 색, 간격 8px */}
         <div className="flex items-center gap-2 text-xs leading-[14px] text-fg-tertiary">
-          <span>{movie.originalTitle}</span>
-          <span>{movie.releaseDate}</span>
+          <span>{movie.original_title}</span>
+          <span>{movie.release_date}</span>
         </div>
 
         {/* 줄거리: 12.5px / 20.25px, 최대 3줄. 짧아도 66px을 차지해서 링크 위치가 카드마다 같아요. */}

@@ -1,23 +1,32 @@
 import { Link } from "@tanstack/react-router";
-import {BookmarkButton} from "../bookmark-button";
-import type { Movie } from "../../types/movie";
+import { BookmarkButton } from "../bookmark-button";
+import type { TmdbMovieListItem } from "../../api/movies/models";
+import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: TmdbMovieListItem;
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
+  const posterUrl = getTmdbPosterUrl(movie.poster_path);
+
   return (
     // Figma: 포스터 274px + 제목 22px + 날짜 14px, 요소 사이 간격 4px (= 318px)
     <article className="flex flex-col gap-1">
       <div className="relative">
         <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }} className="block">
-          {/* 포스터: 높이 274px, radius 10px, 이미지가 뜨기 전에는 page 색 */}
-          <img
-            src={movie.posterPath}
-            alt={movie.title}
-            className="block h-[274px] w-full rounded-[10px] bg-page object-cover"
-          />
+          {/* 포스터: 높이 274px, radius 10px. 포스터가 없으면 같은 크기의 빈 영역 */}
+          {posterUrl ? (
+            <img
+              src={posterUrl}
+              alt={movie.title}
+              className="block h-[274px] w-full rounded-[10px] bg-page object-cover"
+            />
+          ) : (
+            <div className="flex h-[274px] w-full items-center justify-center rounded-[10px] bg-page text-sm text-fg-tertiary">
+              이미지 없음
+            </div>
+          )}
         </Link>
 
         <BookmarkButton movieId={movie.id} />
@@ -29,7 +38,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
           {movie.title}
         </Link>
       </h3>
-      <p className="text-xs leading-[14px] text-fg-tertiary">{movie.releaseDate}</p>
+      <p className="text-xs leading-[14px] text-fg-tertiary">{movie.release_date}</p>
     </article>
   );
 }

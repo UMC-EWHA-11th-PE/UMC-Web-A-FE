@@ -2,7 +2,8 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import SearchForm from "../../components/movies/search-form";
 import SearchResultCard from "../../components/movies/search-result-card";
-import { movies } from "../../data/movies";
+import { searchMovies } from "../../api/movies/search-movies";
+import type { TmdbMovieListItem } from "../../api/movies/models";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -14,14 +15,42 @@ export function SearchPage() {
     setSearchText(query ?? "");
   }, [query]);
 
-  const normalizedQuery = query?.trim().toLowerCase() ?? "";
-  const searchResults = normalizedQuery
-    ? movies.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedQuery) ||
-          movie.originalTitle.toLowerCase().includes(normalizedQuery),
-      )
-    : [];
+  const normalizedQuery = query?.trim() ?? "";
+  const [searchResults, setSearchResults] = useState<TmdbMovieListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    let ignore = false;
+
+    setSearchResults([]);
+    setErrorMessage(null);
+
+    if (!normalizedQuery) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    searchMovies({ query: normalizedQuery })
+      .then((response) => {
+        if (!ignore) setSearchResults(response.results);
+      })
+      .catch(() => {
+        if (!ignore) setErrorMessage("검색 결과를 불러오지 못했어요.");
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [normalizedQuery]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,12 +102,22 @@ export function SearchPage() {
         {/* 검색어와 결과 수: 높이 54px, 위아래 1px 구분선 */}
         <div className="flex h-[54px] items-center justify-between border-y border-line">
           <h2 className="text-lg leading-[21px] font-bold text-fg">‘{query}’ 검색 결과</h2>
-          <span className="text-xs leading-[14px] text-fg-tertiary">
-            영화 {searchResults.length}편
-          </span>
+          {!isLoading && !errorMessage && (
+            <span className="text-xs leading-[14px] text-fg-tertiary">
+              영화 {searchResults.length}편
+            </span>
+          )}
         </div>
 
-        {searchResults.length === 0 ? (
+        {isLoading ? (
+          <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
+            검색 결과를 불러오는 중이에요.
+          </p>
+        ) : errorMessage ? (
+          <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
+            {errorMessage}
+          </p>
+        ) : searchResults.length === 0 ? (
           <p className="py-16 text-center text-sm leading-[17px] text-fg-secondary">
             검색 결과가 없어요.
           </p>
