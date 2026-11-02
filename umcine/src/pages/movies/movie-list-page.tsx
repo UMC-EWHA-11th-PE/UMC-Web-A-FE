@@ -7,6 +7,9 @@ import { MovieSortToggle } from "../../components/movies/movie-sort-toggle";
 import Pagination from "../../components/movies/pagination";
 import { useViewSettingsStore } from "../../stores/view-settings-store";
 
+// TMDB 목록 API는 page를 최대 500까지만 받는다
+const TMDB_MAX_PAGE = 500;
+
 export const MovieListPage = () => {
   const [page, setPage] = useState(1);
 
@@ -17,7 +20,7 @@ export const MovieListPage = () => {
   });
 
   const movieList = moviesQuery.data?.results ?? [];
-  const totalPages = moviesQuery.data?.total_pages ?? 0;
+  const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, TMDB_MAX_PAGE);
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -44,7 +47,7 @@ export const MovieListPage = () => {
       ) : (
         <MovieGrid movies={sortedMovies} />
       )}
-      {/* 로딩 중에도 이전 버튼으로 돌아갈 수 있도록 분기 밖에 둔다 */}
+      {/* 로딩 중에도 페이지 번호가 사라지지 않도록 분기 밖에 둔다 */}
       <Pagination
         page={page}
         totalPages={totalPages}
