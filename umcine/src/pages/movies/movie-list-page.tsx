@@ -1,38 +1,30 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getMovies } from "../../api/movies/get-movies";
-import type { TmdbMovieListItem } from "../../api/movies/models";
 
 import MovieGrid from "../../components/movies/movie-grid";
 import { MovieSortToggle } from "../../components/movies/movie-sort-toggle";
+import Pagination from "../../components/movies/pagination";
 import { useViewSettingsStore } from "../../stores/view-settings-store";
 
+// TMDB 목록 API는 page를 최대 500까지만 받는다
+const TMDB_MAX_PAGE = 500;
+
 export const MovieListPage = () => {
-  const [movieList, setMovieList] = useState<TmdbMovieListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    let ignore = false;
+  // 페이지 번호를 query key에 포함해, 페이지마다 목록을 따로 캐시한다
+  const moviesQuery = useQuery({
+    queryKey: ["movies", "list", { page }],
+    queryFn: () => getMovies({ page }),
+  });
 
-    async function loadMovies() {
-      setIsLoading(true);
-      setErrorMessage(null);
+  const movieList = moviesQuery.data?.results ?? [];
+  const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, TMDB_MAX_PAGE);
 
-      try {
-        const response = await getMovies({page : 1});
-        if (!ignore) setMovieList(response.results);
-      } catch {
-        if (!ignore) setErrorMessage("영화 목록을 불러오지 못했어요.");
-      } finally {
-        if (!ignore) setIsLoading(false);
-      }
-    }
-    
-    loadMovies();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+  };
 
   const sortOrder = useViewSettingsStore((state) => state.sortOrder);
   const sortedMovies = [...movieList].sort((a, b) => {
@@ -46,15 +38,21 @@ export const MovieListPage = () => {
     <main className="flex flex-col gap-5 px-20 py-6">
       <h1 className="text-[38px] leading-[44px] font-bold">영화 목록</h1>
       <MovieSortToggle />
-      {isLoading ? (
+      {moviesQuery.isPending ? (
         <p>영화 목록을 불러오는 중이에요.</p>
-      ) : errorMessage ? (
-        <p>{errorMessage}</p>
+      ) : moviesQuery.isError ? (
+        <p>영화 목록을 불러오지 못했어요.</p>
       ) : sortedMovies.length === 0 ? (
         <p>조건에 맞는 영화가 없어요.</p>
       ) : (
         <MovieGrid movies={sortedMovies} />
       )}
+      {/* 로딩 중에도 페이지 번호가 사라지지 않도록 분기 밖에 둔다 */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </main>
   );
 };
