@@ -58,7 +58,9 @@ export function MovieListPage() {
                         최신 영화 목록을 불러오지 못해 이전 목록을 보여드리고 있어요.
                     </p>
                 )}
-                {moviesQuery.isPending ? (
+                {moviesQuery.isPending && moviesQuery.isPaused ? (
+                    <p className="py-20 text-center text-sm text-(--color-text-secondary)">네트워크 연결을 기다리는 중이에요.</p>
+                ) : moviesQuery.isPending ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오는 중이에요.</p>
                 ) : !moviesQuery.data ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오지 못했어요.</p>
