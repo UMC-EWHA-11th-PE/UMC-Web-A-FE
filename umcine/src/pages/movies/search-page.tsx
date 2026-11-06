@@ -95,14 +95,21 @@ export function SearchPage() {
 
                 <div className="flex h-[54px] items-center justify-between border-y border-(--color-border-default)">
                     <h2 className="text-lg font-bold leading-[normal]">‘{query}’ 검색 결과</h2>
-                    {searchQuery.isSuccess && (
+                    {searchQuery.data && (
                         <p className="text-xs leading-[normal] text-(--color-text-tertiary)">영화 {totalResults}편</p>
                     )}
                 </div>
 
-                {searchQuery.isLoading ? (
+                {searchQuery.isRefetchError && (
+                    <p role="status" className="pt-4 text-center text-sm text-(--color-text-secondary)">
+                        최신 검색 결과를 불러오지 못해 이전 결과를 보여드리고 있어요.
+                    </p>
+                )}
+                {searchQuery.isPending && searchQuery.isPaused ? (
+                    <p className="py-20 text-center text-sm text-(--color-text-secondary)">네트워크 연결을 기다리는 중이에요.</p>
+                ) : searchQuery.isPending ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">검색 결과를 불러오는 중이에요.</p>
-                ) : searchQuery.isError ? (
+                ) : !searchQuery.data ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">검색 결과를 불러오지 못했어요.</p>
                 ) : movies.length === 0 ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">조건에 맞는 영화가 없어요.</p>

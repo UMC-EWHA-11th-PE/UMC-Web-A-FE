@@ -34,12 +34,13 @@ export function MovieDetailPage() {
         return <main className="px-4 py-20 text-center md:px-20">영화 정보를 불러오는 중이에요.</main>;
     }
 
-    if (movieDetailQuery.isError) {
+    const movie = movieDetailQuery.data;
+
+    // 캐시된 데이터가 없을 때만 오류 화면을 보여주고, 재요청 실패 시에는 기존 상세 화면을 유지한다.
+    if (!movie) {
         return <main
             className="px-4 py-20 text-center md:px-20">{getMovieDetailErrorMessage(movieDetailQuery.error)}</main>;
     }
-
-    const movie = movieDetailQuery.data;
 
     const posterUrl = getTmdbPosterUrl(movie.poster_path);
     const backdropUrl = getTmdbBackdropUrl(movie.backdrop_path);

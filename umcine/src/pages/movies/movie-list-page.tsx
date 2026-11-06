@@ -53,9 +53,14 @@ export function MovieListPage() {
                         ))}
                     </div>
                 </div>
+                {moviesQuery.isRefetchError && (
+                    <p role="status" className="text-center text-sm text-(--color-text-secondary)">
+                        최신 영화 목록을 불러오지 못해 이전 목록을 보여드리고 있어요.
+                    </p>
+                )}
                 {moviesQuery.isPending ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오는 중이에요.</p>
-                ) : moviesQuery.isError ? (
+                ) : !moviesQuery.data ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">영화 목록을 불러오지 못했어요.</p>
                 ) : movies.length === 0 ? (
                     <p className="py-20 text-center text-sm text-(--color-text-secondary)">조건에 맞는 영화가 없어요.</p>
