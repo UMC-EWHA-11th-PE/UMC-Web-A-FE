@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
-import type { TmdbMovieDetail } from "../../api/movies/models";
 import { useBookmarkStore } from "../../stores/bookmark-store";
 import { formatRuntime } from "../../utils/movies/format-runtime";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
@@ -12,56 +11,33 @@ export function MovieDetailPage() {
   const parsedMovieId = Number(movieId);
   const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
 
-  const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // 영화 번호를 query key에 포함해, 영화마다 상세 정보를 따로 캐시한다
+  // 유효하지 않은 영화 번호는 요청하지 않는다 (훅은 조기 return보다 위에 둔다)
+  const movieDetailQuery = useQuery({
+    queryKey: ["movies", "detail", parsedMovieId],
+    queryFn: () => getMovieDetail(parsedMovieId),
+    enabled: isValidMovieId,
+    staleTime: 30 * 1000,
+  });
 
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    let ignore = false;
-
-    setMovie(null);
-    setErrorMessage(null);
-
-    if (!Number.isInteger(parsedMovieId) || parsedMovieId <= 0) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    getMovieDetail(parsedMovieId)
-      .then((response) => {
-        if (!ignore) setMovie(response);
-      })
-      .catch((error) => {
-        if (!ignore) setErrorMessage(getMovieDetailErrorMessage(error));
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [parsedMovieId]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
+  // 요청하지 않는 query도 isPending이 참일 수 있어서, 잘못된 번호를 로딩보다 먼저 처리한다
   if (!isValidMovieId) {
     return <main className="px-20 py-6">올바르지 않은 영화 번호예요.</main>;
   }
 
-  if (isLoading) {
+  if (movieDetailQuery.isPending) {
     return <main className="px-20 py-6">영화 정보를 불러오는 중이에요.</main>;
   }
 
-  if (errorMessage) {
-    return <main className="px-20 py-6">{errorMessage}</main>;
+  if (movieDetailQuery.isError) {
+    return (
+      <main className="px-20 py-6">
+        {getMovieDetailErrorMessage(movieDetailQuery.error)}
+      </main>
+    );
   }
 
-  if (!movie) {
-    return null;
-  }
+  const movie = movieDetailQuery.data;
 
   const posterUrl = getTmdbPosterUrl(movie.poster_path);
   const backdropUrl = getTmdbBackdropUrl(movie.backdrop_path);
