@@ -28,7 +28,7 @@ export function Header({isLoggedIn} :headerProps) {
                     <Link to="/search" className={cn("w-[26px] h-[17px] text-[14px] text-center align-middle text-[#17191E]",
                         isActive("/search") ? "font-bold underline" : ""
                     )}>검색</Link>
-                    <Link to="/" className={cn("w-[26px] h-[17px] text-[14px] text-center align-middle text-[#17191E] whitespace-nowrap",
+                    <Link to="/mypage" className={cn("w-[26px] h-[17px] text-[14px] text-center align-middle text-[#17191E] whitespace-nowrap",
                         isActive("/myinfo") ? "font-bold underline" : ""
                     )}>내 정보</Link>
                 </div>
@@ -37,7 +37,13 @@ export function Header({isLoggedIn} :headerProps) {
 
             <div className="flex flex-rows items-center justify-between box-border w-[147px] h-[42px] gap-[10px]">
                 <img src="/icons/search.svg" className="flex items-center justify-between box-border w-[17.5px] h-[17.5px] t-[3px] l-[3px] grayscale brightness-125"/>
-                <span className="flex items-center justify-between box-border w-[95px] h-[42px] px-4 rounded-[8px] border font-extrabold text-[14px] text-center align-middle text-white bg-[#2563EB]">{isLoggedIn?"마이페이지":"로그인"}</span>
+
+                <Link
+                    to="/mypage"
+                    className="flex items-center justify-between box-border w-[95px] h-[42px] px-4 rounded-[8px] border font-extrabold text-[14px] text-center align-middle text-white bg-[#2563EB]"
+                >
+                    {isLoggedIn?"마이페이지":"로그인"}
+                </Link>
             </div>
         </header>
     )

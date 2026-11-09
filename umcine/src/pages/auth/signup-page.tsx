@@ -1,6 +1,9 @@
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
+import { signup } from "../../api/members/signup";
+//import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 const DEFAULT_DUPLICATE_CHECK = {
 	isChecking: false,
@@ -35,6 +38,10 @@ export function SignupPage() {
 		email: DEFAULT_DUPLICATE_CHECK,
 		nickname: DEFAULT_DUPLICATE_CHECK,
 	})
+
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	//const navigate = useNavigate()
+
 
   // 입력값의 유효성 검사
   const isEmailValid = EMAIL_REGEX.test(form.email.trim());
@@ -102,7 +109,19 @@ export function SignupPage() {
 			);
 
 		} 
-		
+
+		catch (error) {
+			console.error("중복 확인 오류:", error);
+
+			setDuplicateCheck((prev) => ({
+				...prev,
+				[key]: { ...prev[key], isAvailable: false },
+			}));
+
+			alert("중복 확인에 실패했어요. 콘솔을 확인해주세요.");
+		}
+			
+		/*
 		catch {
 			setDuplicateCheck((prev) => ({
 				...prev,
@@ -110,8 +129,8 @@ export function SignupPage() {
 			}));
 			
 			alert("중복 확인에 실패했어요. 다시 시도해주세요.");
-		}
-
+		} */
+		
 		finally {
 			setDuplicateCheck((prev) => ({
 				...prev,
@@ -122,11 +141,29 @@ export function SignupPage() {
 
 
   
-  const handleSubmit = (e:React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e:React.SubmitEvent<HTMLFormElement>) => {
 	  // 폼 제출 시 페이지 새로고침 방지
     e.preventDefault()
     
-    // 3.4에서 회원가입 API 요청 추가
+    // 회원가입 API 요청
+		if(!canSubmit || isSubmitting) return;
+
+		setIsSubmitting(true);
+		try {
+			const response = await signup({
+				email: form.email.trim(),
+				nickname: form.nickname.trim(),
+				password: form.password,
+			});
+
+			alert(response.message);
+		} catch {
+			alert("회원가입에 실패했어요. 다시 시도해주세요.");
+		} finally {
+			setIsSubmitting(false);
+		}
+
+
   };
   
   // noValidate는 폼 제출 시 브라우저의 기본 유효성 검사를 끔
@@ -150,7 +187,7 @@ export function SignupPage() {
 								value={form.email}
 								onChange={(e) => handleChangeField("email", e.target.value)}
 								placeholder="name@example.com"
-								className="flex-1 min-w-0 h-full bg-transparent"
+								className="flex-1 min-w-0 h-full"
 							/>
 							<button 
 								type="button"
@@ -245,15 +282,20 @@ export function SignupPage() {
 
 				<button 
 					type="submit" 
-					disabled={!canSubmit}
+					disabled={!canSubmit || isSubmitting }
 					className={`h-12 border rounded-[8px] ${ canSubmit ? "bg-[#2563EB]" : "bg-[#9ab5f5]" } border-white p-4 text-center items-center text-white text-[14px] font-extrabold`}
 				>
-					가입하기
+					{isSubmitting ? "가입 중" : "가입하기"}
 				</button>
 
 				<div className="flex flex-row justify-center items-center gap-1">
 						<p className="font-regular text-[13px] text-[#606774] ">이미 계정이 있나요?</p>
-						<p className="font-extrabold text-[12px] text-[#2563EB] ">로그인</p>
+						<Link
+							to="/login"
+							className="font-extrabold text-[12px] text-[#2563EB] "
+						>
+							로그인
+						</Link>
 				</div>
 
 
