@@ -8,4 +8,6 @@ if (!tmdbApiBaseUrl || !tmdbAccessToken) {
 export const env = {
   tmdbApiBaseUrl,
   tmdbAccessToken,
+  // 회원 서버(Spring) 주소
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "",
 };
