@@ -1,6 +1,18 @@
+import {useQueryClient} from "@tanstack/react-query";
 import {Link} from "@tanstack/react-router";
+import {memberQueries} from "../../api/members/member-queries.ts";
+import {useAuthStore} from "../../stores/auth-store.ts";
 
 export function Header(){
+    const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
+    const clearAuth = useAuthStore((state) => state.clearAuth);
+    const queryClient = useQueryClient();
+
+    const handleLogout = () => {
+        clearAuth();
+        queryClient.removeQueries({queryKey: memberQueries.me(false).queryKey});
+    };
+
     return(
         <header className="flex items-center justify-between self-stretch border-b border-(--color-border-default) bg-(--color-bg-surface) px-4 py-4 md:px-20 md:py-6">
             <div className="flex items-center gap-4 md:gap-[42px]">
@@ -22,7 +34,11 @@ export function Header(){
                         inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
                         className="text-sm font-bold"
                         to="/search">검색</Link>
-                    <a className="text-sm font-bold text-(--color-text-secondary) no-underline" href="#">내 정보</a>
+                    <Link
+                        activeProps={{className:"text-(--color-text-primary) underline"}}
+                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
+                        className="text-sm font-bold"
+                        to="/mypage">내 정보</Link>
                 </nav>
             </div>
 
@@ -30,7 +46,11 @@ export function Header(){
                 <button type="button" className="hidden size-[42px] place-items-center rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) sm:grid" aria-label="영화 검색">
                     <img className="size-6" src="/icons/movie-icons/search.svg" alt=""/>
                 </button>
-                <button type="button" className="h-[42px] rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)">로그인</button>
+                {isLoggedIn ? (
+                    <button type="button" onClick={handleLogout} className="h-[42px] rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) px-4 text-sm font-extrabold text-(--color-text-secondary)">로그아웃</button>
+                ) : (
+                    <Link to="/login" className="flex h-[42px] items-center rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)">로그인</Link>
+                )}
             </div>
         </header>
     );

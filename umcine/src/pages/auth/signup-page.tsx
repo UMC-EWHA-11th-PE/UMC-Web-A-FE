@@ -2,7 +2,7 @@ import { useState } from "react";
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate.ts";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";
 import { signup } from "../../api/members/signup.ts";
-// import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 // 이메일 형식 검사
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -126,7 +126,6 @@ export function SignupPage() {
     };
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // const navigate = useNavigate();
 
     const handleSubmit = async (e:React.SubmitEvent<HTMLFormElement>) => {
         // 폼 제출 시 페이지 새로고침 방지
@@ -262,7 +261,7 @@ export function SignupPage() {
 
                 <div className="flex items-end justify-center">
                     <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">이미 계정이 있나요? </p>
-                    <button type="button" className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">로그인</button>
+                    <Link to="/login" className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">로그인</Link>
                 </div>
             </form>
         </main>
