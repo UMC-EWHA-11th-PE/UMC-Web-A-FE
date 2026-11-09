@@ -56,12 +56,12 @@ export default function Header() {
             className="size-6 bg-fg-secondary mask-[url('/icons/search.svg')] mask-center mask-no-repeat"
           />
         </Link>
-        <button
-          type="button"
-          className="h-[42px] cursor-pointer rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
+        <Link
+          to="/login"
+          className="flex h-[42px] cursor-pointer items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
         >
           로그인
-        </button>
+        </Link>
       </div>
     </header>
   );
