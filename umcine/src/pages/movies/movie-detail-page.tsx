@@ -1,5 +1,6 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { movies } from "../../data/movies";
+import { BookmarkButton } from "../../components/bookmark-button";
 
 
 export function MovieDetailPage() {
@@ -47,16 +48,24 @@ export function MovieDetailPage() {
                 <div className="flex flex-col w-[656px] h-[163px] gap-[10px] font-['Font_5']" box-border>
                     <h2 className="font-bold text-[21px] align-middle text-[#17191E]">{movie.tagline}</h2>
                     <p className="font-normal text-[14px] leading-[24px] align-normal text-[#606774]">{movie.overview}</p>
-                    <button 
-                        aria-pressed={movie.isBookmarked} 
-                        className="flex flex-row items-center justify-center w-[107px] h-[42px] rounded-[8px] p-4 text-white bg-[#2563EB] align-middle box-border"
+
+
+                    <BookmarkButton
+                        movieId={movie.id} 
+                        buttonStyle="flex flex-row items-center justify-center w-[107px] h-[42px] rounded-[8px] p-4 text-white bg-[#2563EB] align-middle box-border"
                     >
-                        <img 
-                        src= {movie.isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
-                        className="w-5 h-5 brightness-0 invert"
-                        />
-                        <p className="font-extrabold text-[14px] align-middle">즐겨찾기</p>
-                    </button>
+                        {(isBookmarked) => 
+                            <div className="flex flex-row items-center justify-center">
+                                <img
+                                    src= {isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
+                                    className="w-5 h-5 brightness-0 invert"
+                                />
+                                <p className="font-extrabold text-[14px] align-middle">즐겨찾기</p>
+                            </div>
+                        }
+                    </BookmarkButton>
+
+
                 </div>
 
 

@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type SubmitEvent } from "react";
 import { movies } from "../../data/movies";
+import { BookmarkButton } from "../../components/bookmark-button";
 
 export function SearchPage() {
   const { query } = useSearch({ from: "/search" });
@@ -113,6 +114,21 @@ export function SearchPage() {
                   </div>
                   <p className="text-[12.5px] font-regular leading-[20px] text-[#606774]">{movie.overview}</p>
 
+
+                  <BookmarkButton
+                    movieId={movie.id} 
+                    buttonStyle="right-[10px] top-[10px] flex items-center justify-center box-border w-[34px] h-[34px] rounded-[8px]"
+                  >
+                    {(isBookmarked) =>
+                      <img 
+                        src= {isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
+                        className="w-[34px] h-[34px] brightness-0 invert"
+                      />
+                    }
+
+                  </BookmarkButton>
+
+
                   <Link
                     to="/movies/$movieId"
                     params={{ movieId: String(movie.id) }}
@@ -121,7 +137,6 @@ export function SearchPage() {
                     <p>상세보기</p>
                     <img src="/icons/arrow-right.svg" className="w-4 h-4"/>
                   </Link>
-                    
 
 
                 </div>
