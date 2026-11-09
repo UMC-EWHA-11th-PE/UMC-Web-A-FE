@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import MovieGrid from "../../components/movies/movie-grid";
@@ -47,19 +48,18 @@ export function MyPage() {
         <h1 className="text-[38px] leading-[44px] font-bold tracking-[-1.71px] text-fg">
           내 정보
         </h1>
-        {/* 다음 커밋에서 /my/edit 화면과 연결 */}
-        <button
-          type="button"
-          className="h-[42px] cursor-pointer rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
+        <Link
+          to="/my/edit"
+          className="flex h-[42px] items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
         >
           정보 수정
-        </button>
+        </Link>
       </div>
 
       <section className="flex flex-col gap-4 border-t border-line py-5">
         <h2 className="text-sm leading-[17px] font-bold text-fg">기본 정보</h2>
         <div className="flex items-center gap-6">
-          <ProfileAvatar />
+          <ProfileAvatar image={profile.profileImage ?? null} />
           <dl className="grid flex-1 grid-cols-2 gap-6">
             <ProfileItem label="닉네임" value={profile.nickname} />
             <ProfileItem label="이메일" value={profile.email} />
@@ -94,14 +94,18 @@ export function MyPage() {
   );
 }
 
-// Figma: 64px 원형 회색 배경 + 가운데 사람 아이콘
-function ProfileAvatar() {
+// Figma: 64px 원형 회색 배경 + 가운데 사람 아이콘. 저장한 프로필 이미지가 있으면 그 이미지를 보여줌
+function ProfileAvatar({ image }: { image: string | null }) {
   return (
-    <div className="grid size-16 shrink-0 place-items-center rounded-full bg-line">
-      <span
-        aria-hidden="true"
-        className="size-7 bg-fg mask-[url('/icons/person.svg')] mask-contain mask-center mask-no-repeat"
-      />
+    <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-line">
+      {image ? (
+        <img src={image} alt="프로필 이미지" className="size-full object-cover" />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="size-7 bg-fg mask-[url('/icons/person.svg')] mask-contain mask-center mask-no-repeat"
+        />
+      )}
     </div>
   );
 }

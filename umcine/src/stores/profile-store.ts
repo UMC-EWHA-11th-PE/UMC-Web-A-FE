@@ -4,6 +4,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 interface Profile {
   nickname: string;
   email: string;
+  // 줄인 프로필 이미지(data URL). 고른 적이 없으면 null
+  profileImage: string | null;
 }
 
 interface ProfileStore {
@@ -18,6 +20,7 @@ export const useProfileStore = create<ProfileStore>()(
       profile: {
         nickname: "moviefan",
         email: "umc@example.com",
+        profileImage: null,
       },
       updateProfile: (profile) => set({ profile }),
     }),
