@@ -16,8 +16,11 @@ export const apiClient = ky.create({
         afterResponse: [
             ({ request, response }) => {
                 // 토큰을 보냈는데 401이면 만료되었거나 유효하지 않은 토큰
-                if (response.status === 401 && request.headers.has("Authorization")) {
-                    useAuthStore.getState().clearAuth();
+                if (response.status !== 401) return;
+
+                const { accessToken, clearAuth } = useAuthStore.getState();
+                if(accessToken && request.headers.get("Authorization") === `Bearer ${accessToken}`) {
+                    clearAuth();
                 }
             },
         ],
