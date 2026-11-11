@@ -2,7 +2,7 @@ import { useState } from "react";
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate.ts";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";
 import { signup } from "../../api/members/signup.ts";
-import { Link } from "@tanstack/react-router";
+import {Link, useNavigate} from "@tanstack/react-router";
 
 // 이메일 형식 검사
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -127,6 +127,8 @@ export function SignupPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const navigate=useNavigate();
+
     const handleSubmit = async (e:React.SubmitEvent<HTMLFormElement>) => {
         // 폼 제출 시 페이지 새로고침 방지
         e.preventDefault()
@@ -142,6 +144,10 @@ export function SignupPage() {
             });
 
             alert(response.message);
+
+            if(response.isSuccess){
+                void navigate({to:"/login"});
+            }
         } catch {
             alert("회원가입에 실패했어요. 다시 시도해 주세요.");
         } finally {
