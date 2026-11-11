@@ -103,7 +103,12 @@ export function MyPage() {
                             <p className="text-sm leading-[22.4px] text-(--color-text-secondary)">닉네임만 변경할 수 있어요.</p>
                         </div>
                         <div className="flex gap-2">
-                            <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={() => setIsEditing(false)}>취소</button>
+                            <button type="button"
+                                    className={SECONDARY_BUTTON_CLASS}
+                                    disabled={updateMutation.isPending}
+                                    onClick={() => setIsEditing(false)}>
+                                취소
+                            </button>
                             <button type="submit" disabled={!canSave} className={PRIMARY_BUTTON_CLASS}>변경사항 저장</button>
                         </div>
                     </div>
