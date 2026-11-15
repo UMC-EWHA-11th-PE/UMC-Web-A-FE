@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { login } from "../../api/auth/login.ts";
-import { memberQueries } from "../../api/members/member-queries.ts";
-import { useAuthStore } from "../../stores/auth-store.ts";
-import { getApiErrorMessage } from "../../utils/get-api-error-message.ts";
+import {useState} from "react";
+import {Link} from "@tanstack/react-router";
+import {getApiErrorMessage} from "../../utils/get-api-error-message.ts";
+import {useLoginMutation} from "../../hooks/use-login-mutation.ts";
 
 const DEFAULT_FORM = {
     email: "",
@@ -19,35 +16,24 @@ const FIELD_CLASS =
 const INPUT_CLASS =
     "min-w-0 flex-1 bg-transparent px-[2px] py-px text-sm leading-[normal] outline-none placeholder:text-(--color-text-tertiary)";
 const ERROR_CLASS = "text-[11px] leading-[normal] text-(--color-danger-default)";
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
     const [form, setForm] = useState(DEFAULT_FORM);
-    const setAccessToken = useAuthStore((state) => state.setAccessToken);
-    const queryClient = useQueryClient();
-    const navigate = useNavigate();
+    const loginMutation=useLoginMutation();
+    const canSubmit=EMAIL_REGEX.test(form.email.trim())&&form.password.length>0;
 
-    const loginMutation = useMutation({
-        mutationFn: login,
-        onSuccess: ({ accessToken }) => {
-            // 이전 계정의 내 정보 캐시가 보이지 않도록 제거
-            queryClient.removeQueries({ queryKey: memberQueries.me(false).queryKey });
-            setAccessToken(accessToken);
-            void navigate({ to: "/mypage" });
-        },
-    });
-
-    const canSubmit =
-        form.email.trim().length > 0 && form.password.length > 0 && !loginMutation.isPending;
-
-    const handleChangeField = (key: LoginFormKey, value: string) => {
-        setForm((prev) => ({ ...prev, [key]: value }));
+    const handleChangeField=(key:LoginFormKey, value:string)=>{
+        setForm((prev)=>({...prev, [key]:value}));
     };
 
-    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!canSubmit) return;
-
-        loginMutation.mutate({ email: form.email.trim(), password: form.password });
+    const handleSubmit=(event: React.SubmitEvent<HTMLFormElement>)=>{
+        event.preventDefault();
+        if(!canSubmit||loginMutation.isPending) return;
+        loginMutation.mutate({
+            email: form.email.trim(),
+            password: form.password,
+        });
     };
 
     return (
@@ -97,15 +83,17 @@ export function LoginPage() {
 
                 <button
                     type="submit"
-                    disabled={!canSubmit}
+                    disabled={!canSubmit || loginMutation.isPending}
                     className="flex h-12 items-center justify-center rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold leading-[normal] text-(--color-bg-surface) hover:bg-(--color-action-hover) active:bg-(--color-action-pressed) disabled:cursor-not-allowed disabled:bg-(--color-action-disabled)"
                 >
-                    로그인
+                    {loginMutation.isPending ? "로그인 중" : "로그인"}
                 </button>
 
                 <div className="flex items-end justify-center">
-                    <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">아직 계정이 없나요? </p>
-                    <Link to="/signup" className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">회원가입</Link>
+                    <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">아직 계정이
+                        없나요? </p>
+                    <Link to="/signup"
+                          className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">회원가입</Link>
                 </div>
             </form>
         </main>
