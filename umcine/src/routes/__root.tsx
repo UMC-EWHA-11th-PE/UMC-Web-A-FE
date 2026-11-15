@@ -5,7 +5,7 @@ import { Footer } from '../components/layout/footer';
 export const Route = createRootRoute({
   component: () => (
     <div className='flex min-h-screen flex-col'>
-      <Header isLoggedIn={true} />
+      <Header />
       <main className='flex-1'>
         <Outlet/>
       </main>
