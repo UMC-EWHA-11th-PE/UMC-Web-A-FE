@@ -1,6 +1,8 @@
 import {useQueryClient} from "@tanstack/react-query";
 import {Link} from "@tanstack/react-router";
+import {favoriteQueries} from "../../api/favorites/favorite-queries.ts";
 import {memberQueries} from "../../api/members/member-queries.ts";
+import {ratingQueries} from "../../api/ratings/rating-queries.ts";
 import {useQuery} from "@tanstack/react-query";
 import {useAuthStore} from "../../stores/auth-store.ts";
 
@@ -12,6 +14,8 @@ export function Header() {
     const handleLogout = () => {
         clearAuth();
         queryClient.removeQueries({queryKey: memberQueries.me(false).queryKey});
+        queryClient.removeQueries({queryKey: favoriteQueries.all});
+        queryClient.removeQueries({queryKey: ratingQueries.all});
     };
 
     const meQuery = useQuery(memberQueries.me(isLoggedIn));
