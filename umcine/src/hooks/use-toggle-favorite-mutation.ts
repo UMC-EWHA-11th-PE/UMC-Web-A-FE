@@ -16,7 +16,6 @@ export function useToggleFavoriteMutation(movieId: number) {
         },
         onSuccess: (favorite) => {
             queryClient.setQueryData(favoriteQueries.status(movieId, true).queryKey, {
-                movieId,
                 isFavorite: favorite !== null,
             });
             queryClient.setQueryData(favoriteQueries.list(true).queryKey, (prev) => {

@@ -8,7 +8,6 @@ export interface Favorite {
 }
 
 export interface FavoriteStatus {
-    movieId: number;
     isFavorite: boolean;
 }
 
