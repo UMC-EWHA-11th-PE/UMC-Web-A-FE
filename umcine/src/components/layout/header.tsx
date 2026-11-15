@@ -1,9 +1,10 @@
 import {useQueryClient} from "@tanstack/react-query";
 import {Link} from "@tanstack/react-router";
 import {memberQueries} from "../../api/members/member-queries.ts";
+import {useQuery} from "@tanstack/react-query";
 import {useAuthStore} from "../../stores/auth-store.ts";
 
-export function Header(){
+export function Header() {
     const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
     const clearAuth = useAuthStore((state) => state.clearAuth);
     const queryClient = useQueryClient();
@@ -13,8 +14,11 @@ export function Header(){
         queryClient.removeQueries({queryKey: memberQueries.me(false).queryKey});
     };
 
-    return(
-        <header className="flex items-center justify-between self-stretch border-b border-(--color-border-default) bg-(--color-bg-surface) px-4 py-4 md:px-20 md:py-6">
+    const meQuery = useQuery(memberQueries.me(isLoggedIn));
+
+    return (
+        <header
+            className="flex items-center justify-between self-stretch border-b border-(--color-border-default) bg-(--color-bg-surface) px-4 py-4 md:px-20 md:py-6">
             <div className="flex items-center gap-4 md:gap-[42px]">
                 <div className="flex items-center gap-2.5">
                     <span className="grid size-8 place-items-center rounded-lg border-2 border-(--color-text-primary)">
@@ -24,34 +28,39 @@ export function Header(){
                 </div>
                 <nav className="flex items-center gap-4 whitespace-nowrap md:gap-[30px]">
                     <Link
-                        activeProps={{className:"text-(--color-text-primary) underline"}}
-                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
-                        activeOptions={{ exact: true }}
+                        activeProps={{className: "text-(--color-text-primary) underline"}}
+                        inactiveProps={{className: "text-(--color-text-secondary) no-underline"}}
+                        activeOptions={{exact: true}}
                         className="text-sm font-bold"
                         to="/">영화</Link>
                     <Link
-                        activeProps={{className:"text-(--color-text-primary) underline"}}
-                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
+                        activeProps={{className: "text-(--color-text-primary) underline"}}
+                        inactiveProps={{className: "text-(--color-text-secondary) no-underline"}}
                         className="text-sm font-bold"
                         to="/search">검색</Link>
                     <Link
-                        activeProps={{className:"text-(--color-text-primary) underline"}}
-                        inactiveProps={{className:"text-(--color-text-secondary) no-underline"}}
+                        activeProps={{className: "text-(--color-text-primary) underline"}}
+                        inactiveProps={{className: "text-(--color-text-secondary) no-underline"}}
                         className="text-sm font-bold"
                         to="/mypage">내 정보</Link>
                 </nav>
             </div>
 
             <div className="flex items-center gap-2.5">
-                <button type="button" className="hidden size-[42px] place-items-center rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) sm:grid" aria-label="영화 검색">
+                <button type="button"
+                        className="hidden size-[42px] place-items-center rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) sm:grid"
+                        aria-label="영화 검색">
                     <img className="size-6" src="/icons/movie-icons/search.svg" alt=""/>
                 </button>
-                {isLoggedIn ? (
-                    <button type="button" onClick={handleLogout} className="h-[42px] rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) px-4 text-sm font-extrabold text-(--color-text-secondary)">로그아웃</button>
+                {!isLoggedIn ? (
+                    <Link to="/login"
+                          className="flex h-[42px] items-center rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)">로그인</Link>
+                ) : meQuery.isLoading ? (
+                    <span className="h-[42px] w-[84px] animate-pulse rounded-lg bg-(--color-border-default)" />
                 ) : (
-                    <Link to="/login" className="flex h-[42px] items-center rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold text-(--color-bg-surface)">로그인</Link>
-                )}
-            </div>
+                    <button type="button" onClick={handleLogout}
+                            className="h-[42px] rounded-lg border border-(--color-border-default) bg-(--color-bg-surface) px-4 text-sm font-extrabold text-(--color-text-secondary)">로그아웃</button>
+                )}            </div>
         </header>
     );
 }
