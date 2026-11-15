@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Navigate } from "@tanstack/react-router";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";
 import { memberQueries } from "../../api/members/member-queries.ts";
 import Footer from "../../components/layout/footer.tsx";
@@ -39,10 +38,6 @@ export function MyPage() {
     const [nickname, setNickname] = useState("");
     const updateMutation=useUpdateMyInfoMutation();
     const nicknameCheckMutation = useMutation({ mutationFn: checkNicknameDuplicate });
-
-    if (!isLoggedIn) {
-        return <Navigate to="/login" replace />;
-    }
 
     if (myInfoQuery.isPending) {
         return <main className={STATUS_CLASS}>내 정보를 불러오는 중이에요.</main>;
