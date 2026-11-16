@@ -2,6 +2,9 @@ import { useState, type SubmitEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { FormField, InputBox } from "../../components/auth/form-field";
 import { INPUT_CLASS_NAME } from "../../components/auth/form-field-styles";
+import { useLoginMutation } from "../../hooks/use-login-mutation";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const DEFAULT_FORM = {
   email: "",
@@ -17,9 +20,17 @@ export function LoginPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const loginMutation = useLoginMutation();
+  const canSubmit = EMAIL_REGEX.test(form.email.trim()) && form.password.length > 0;
+
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // 로그인 API 연결은 8주차에서 진행
+    if (!canSubmit || loginMutation.isPending) return;
+
+    loginMutation.mutate({
+      email: form.email.trim(),
+      password: form.password,
+    });
   };
 
   return (
@@ -66,9 +77,10 @@ export function LoginPage() {
 
         <button
           type="submit"
-          className="h-12 w-full cursor-pointer rounded-lg bg-action text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
+          disabled={!canSubmit || loginMutation.isPending}
+          className="h-12 w-full cursor-pointer rounded-lg bg-action text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed disabled:cursor-not-allowed disabled:bg-action-disabled"
         >
-          로그인
+          {loginMutation.isPending ? "로그인 중" : "로그인"}
         </button>
 
         <p className="text-center text-xs leading-4 text-fg-secondary">
