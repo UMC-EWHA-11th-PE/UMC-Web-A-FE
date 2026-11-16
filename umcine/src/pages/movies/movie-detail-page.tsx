@@ -1,6 +1,7 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import { RatingPanel } from "../../components/movies/rating-panel";
 import { useFavoriteStatusQuery } from "../../hooks/use-favorite-status-query";
 import { useToggleFavorite } from "../../hooks/use-toggle-favorite";
 import { formatRuntime } from "../../utils/movies/format-runtime";
@@ -113,35 +114,7 @@ export function MovieDetailPage() {
           <DetailBookmarkButton movieId={movie.id} />
         </section>
 
-        <aside className="flex w-[360px] shrink-0 flex-col gap-2 border-l border-line pb-[41px] pl-[30px]">
-          <h2 className="text-[21px] leading-[25px] font-bold tracking-[-0.63px] text-fg">내 평점</h2>
-          <p className="text-xs leading-[14px] text-fg-tertiary">별점은 필수, 후기는 선택이에요.</p>
-
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <button
-                key={score}
-                type="button"
-                aria-label={`${score}점`}
-                className="grid size-[38px] cursor-pointer place-items-center rounded-lg border border-line bg-white text-2xl leading-none text-fg-secondary"
-              >
-                ★
-              </button>
-            ))}
-          </div>
-
-          <textarea
-            placeholder="영화를 보고 느낀 점을 남겨보세요."
-            className="h-[102px] w-full resize-none rounded-lg border border-line bg-white px-3 pt-4 pb-[18px] text-[13px] leading-5 text-fg placeholder:text-fg-tertiary"
-          />
-
-          <button
-            type="button"
-            className="h-[42px] w-full cursor-pointer rounded-lg border border-white bg-fg text-sm font-extrabold text-white"
-          >
-            평점 저장
-          </button>
-        </aside>
+        <RatingPanel movieId={movie.id} />
       </div>
     </main>
   );
