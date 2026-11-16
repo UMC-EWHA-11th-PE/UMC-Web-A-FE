@@ -1,8 +1,8 @@
-import { useState, type SubmitEvent } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
-import { signup } from "../../api/members/signup";
+import { useSignupMutation } from "../../hooks/use-signup-mutation";
 import { FormField, InputBox } from "../../components/auth/form-field";
 import {
   CHECK_BUTTON_CLASS_NAME,
@@ -38,9 +38,6 @@ export function SignupPage() {
     email: DEFAULT_DUPLICATE_CHECK,
     nickname: DEFAULT_DUPLICATE_CHECK,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
-
   // 입력값의 유효성 검사
   const isEmailValid = EMAIL_REGEX.test(form.email.trim());
   const isNicknameValid =
@@ -114,28 +111,18 @@ export function SignupPage() {
     }
   };
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
-    // 폼 제출 시 페이지 새로고침 방지
-    event.preventDefault();
-    if (!canSubmit || isSubmitting) return;
+  const signupMutation = useSignupMutation();
 
-    setIsSubmitting(true);
-    try {
-      // passwordConfirm은 화면에서만 검사하므로 요청에 포함하지 않음
-      const response = await signup({
-        email: form.email.trim(),
-        nickname: form.nickname.trim(),
-        password: form.password,
-      });
-      alert(response.message);
-      // 가입에 성공하면 로그인 화면으로 이동
-      navigate({ to: "/login" });
-    } catch {
-      // 실패하면 입력값을 그대로 두고 다시 요청할 수 있게 함
-      alert("회원가입에 실패했어요. 다시 시도해 주세요.");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!canSubmit || signupMutation.isPending) return;
+
+    signupMutation.mutate({
+      email: form.email.trim(),
+      nickname: form.nickname.trim(),
+      password: form.password,
+    });
   };
 
   return (
@@ -249,10 +236,10 @@ export function SignupPage() {
 
         <button
           type="submit"
-          disabled={!canSubmit || isSubmitting}
+          disabled={!canSubmit || signupMutation.isPending}
           className="h-12 w-full cursor-pointer rounded-lg bg-action text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed disabled:cursor-not-allowed disabled:bg-action-disabled"
         >
-          {isSubmitting ? "가입 중" : "가입하기"}
+          {signupMutation.isPending ? "가입 중" : "가입하기"}
         </button>
 
         <p className="text-center text-xs leading-4 text-fg-secondary">
