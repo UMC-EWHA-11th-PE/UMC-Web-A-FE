@@ -5,8 +5,8 @@ import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import MovieGrid from "../../components/movies/movie-grid";
 import Pagination from "../../components/movies/pagination";
-import { useBookmarkStore } from "../../stores/bookmark-store";
 import { useProfileStore } from "../../stores/profile-store";
+import { useFavoritesQuery } from "../../hooks/use-favorites-query";
 import { useMeQuery } from "../../hooks/use-me-query";
 
 // 영화 목록과 같은 5열 그리드를 2줄씩 보여줌
@@ -15,13 +15,15 @@ const BOOKMARKS_PER_PAGE = 10;
 export function MyPage() {
   const meQuery = useMeQuery();
   const profileImage = useProfileStore((state) => state.profileImage);
-  const bookmarkedMovieIds = useBookmarkStore((state) => state.bookmarkedMovieIds);
+  const favoritesQuery = useFavoritesQuery();
+  // 서버가 내려준 즐겨찾기 목록에서 영화 번호만 꺼냄
+  const favoriteMovieIds = favoritesQuery.data?.map((favorite) => favorite.movieId) ?? [];
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.max(1, Math.ceil(bookmarkedMovieIds.length / BOOKMARKS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(favoriteMovieIds.length / BOOKMARKS_PER_PAGE));
   // 즐겨찾기를 해제해서 페이지 수가 줄어도 빈 페이지에 머물지 않게 함
   const currentPage = Math.min(page, totalPages);
-  const pageMovieIds = bookmarkedMovieIds.slice(
+  const pageMovieIds = favoriteMovieIds.slice(
     (currentPage - 1) * BOOKMARKS_PER_PAGE,
     currentPage * BOOKMARKS_PER_PAGE,
   );
@@ -75,7 +77,11 @@ export function MyPage() {
 
       <section className="flex flex-col gap-4 border-t border-line py-5">
         <h2 className="text-sm leading-[17px] font-bold text-fg">내 즐겨찾기</h2>
-        {bookmarkedMovieIds.length === 0 ? (
+        {favoritesQuery.isPending ? (
+          <p className="py-16 text-center text-sm text-fg-secondary">즐겨찾기를 불러오는 중이에요.</p>
+        ) : favoritesQuery.isError ? (
+          <p className="py-16 text-center text-sm text-fg-secondary">즐겨찾기를 불러오지 못했어요.</p>
+        ) : favoriteMovieIds.length === 0 ? (
           <p className="py-16 text-center text-sm text-fg-secondary">즐겨찾기한 영화가 없어요.</p>
         ) : isLoading ? (
           <p className="py-16 text-center text-sm text-fg-secondary">즐겨찾기한 영화를 불러오는 중이에요.</p>
@@ -93,7 +99,7 @@ export function MyPage() {
         )}
       </section>
 
-      {bookmarkedMovieIds.length > 0 && (
+      {favoriteMovieIds.length > 0 && (
         <Pagination page={currentPage} totalPages={totalPages} onPageChange={setPage} />
       )}
     </main>
