@@ -38,7 +38,7 @@ export function ViewProfilePage() {
         <div className="flex flex-row justify-between items-center w-full my-5">
           <h1 className="text-[31px] font-bold">내 정보</h1>
           <Link
-            to="/my"
+            to="/my-edit"
             className="items-center justify-between border border-white rounded-[8px] p-4 h-[42px] bg-[#2563EB] text-white text-[14px] font-extrabold mr-22"
           >
             정보 수정
