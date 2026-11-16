@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { deleteFavorite } from "../../api/favorites/delete-favorite";
 import { getFavorites } from "../../api/favorites/get-favorites";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import { getMe } from "../../api/members/me";
 import MovieGrid from "@/components/movies/movie-grid";
 
 export function ViewProfilePage() {
@@ -36,6 +37,10 @@ export function ViewProfilePage() {
       ]);
     },
   });
+  const meQuery = useQuery({
+    queryKey: ["members", "me"],
+    queryFn: getMe,
+  });
 
   return (
     <div className="flex w-full justify-center mx-12">
@@ -44,7 +49,7 @@ export function ViewProfilePage() {
           <h1 className="text-[31px] font-bold">내 정보</h1>
           <Link
             to="/my-edit"
-            className="items-center justify-between border border-white rounded-[8px] p-4 h-[42px] bg-[#2563EB] text-white text-[14px] font-extrabold mr-22"
+            className="mr-22 inline-flex h-[42px] items-center justify-center rounded-[8px] border border-white bg-[#2563EB] px-4 text-[14px] font-bold text-white"
           >
             정보 수정
           </Link>
@@ -63,13 +68,19 @@ export function ViewProfilePage() {
                 <p className="text-[11px] font-regular text-[#969DA8]">
                   닉네임
                 </p>
-                <p className="text-[14px] font-bold">gs0428</p>
+                <p className="text-[14px] font-bold">
+                  {meQuery.data?.nickname ??
+                    (meQuery.isPending ? "불러오는 중…" : "조회 실패")}
+                </p>
               </div>
             </div>
 
             <div>
               <p className="text-[11px] font-regular text-[#969DA8]">이메일</p>
-              <p className="text-[14px] font-bold">gwangsoo@cinemalab.kr</p>
+              <p className="text-[14px] font-bold">
+                {meQuery.data?.email ??
+                  (meQuery.isPending ? "불러오는 중…" : "조회 실패")}
+              </p>
             </div>
           </div>
         </div>

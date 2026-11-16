@@ -51,9 +51,9 @@ export function EditProfilePage({
     Boolean(onSave) &&
     !isBusy &&
     !isChecking &&
-    !imageError &&
-    (nicknameChanged || profileImage !== null) &&
-    (!nicknameChanged || (isNicknameValid && checkedNickname === nextNickname));
+    nicknameChanged &&
+    isNicknameValid &&
+    checkedNickname === nextNickname;
 
   async function handleCheckNickname() {
     if (!canCheckNickname) return;

@@ -9,6 +9,7 @@ import { deleteRating } from "../../api/ratings/delete-ratings";
 import { useAuthStore } from "../../stores/auth-store";
 import { Link, useParams } from "@tanstack/react-router";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import { useState } from "react";
 
 function getMemberId(accessToken: string | null): number | null {
   if (!accessToken) return null;
@@ -26,6 +27,46 @@ function getMemberId(accessToken: string | null): number | null {
   } catch {
     return null;
   }
+}
+
+function RatingStars({
+  initialScore,
+  disabled,
+}: {
+  initialScore: number;
+  disabled: boolean;
+}) {
+  const [score, setScore] = useState(initialScore);
+
+  return (
+    <fieldset disabled={disabled} className="flex gap-1.5">
+      <legend className="sr-only">별점</legend>
+
+      {[1, 2, 3, 4, 5].map((value) => (
+        <label key={value} className="relative">
+          <input
+            type="radio"
+            name="score"
+            value={value}
+            checked={score === value}
+            onChange={() => setScore(value)}
+            aria-label={`${value}점`}
+            required
+            className="peer sr-only"
+          />
+          <span className="grid h-10 w-10 cursor-pointer place-items-center rounded-lg border border-[#dce1e8] bg-white hover:border-[#929bab] peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+            <img
+              src={
+                value <= score ? "/icons/star.svg" : "/icons/star-outline.svg"
+              }
+              alt=""
+              className="h-6 w-6"
+            />
+          </span>
+        </label>
+      ))}
+    </fieldset>
+  );
 }
 
 export function MovieDetailPage() {
@@ -171,171 +212,176 @@ export function MovieDetailPage() {
               포스터가 없어요.
             </div>
           )}
-
           <div className="min-w-0 flex-1 sm:py-3">
-            <h1 className="break-words text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-              {movie.title}
-            </h1>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+              <div className="min-w-0">
+                <h1 className="break-words text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                  {movie.title}
+                </h1>
 
-            <p className="mt-3 text-base text-white/60 sm:text-lg">
-              {movie.original_title}
-            </p>
+                <p className="mt-3 text-base text-white/60 sm:text-lg">
+                  {movie.original_title}
+                </p>
 
-            {memberId === null ? (
-              <Link to="/login" className="mt-5 inline-block text-sm underline">
-                로그인하고 즐겨찾기와 평점 남기기
-              </Link>
-            ) : (
-              <div className="mt-5 space-y-4">
-                <button
-                  type="button"
-                  aria-pressed={isFavorite}
-                  disabled={
-                    !favoriteQuery.isSuccess || favoriteMutation.isPending
-                  }
-                  onClick={() => favoriteMutation.mutate(isFavorite)}
-                  className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${
-                    isFavorite
-                      ? "bg-yellow-400 text-[#111827]"
-                      : "bg-white/15 text-white"
-                  }`}
-                >
-                  {favoriteQuery.isPending
-                    ? "즐겨찾기 확인 중"
-                    : isFavorite
-                      ? "★ 즐겨찾기 해제"
-                      : "☆ 즐겨찾기 추가"}
-                </button>
-
-                {favoriteQuery.isError && (
-                  <p role="alert" className="text-sm">
-                    즐겨찾기를 불러오지 못했어요.
-                  </p>
-                )}
-                {favoriteMutation.isError && (
-                  <p role="alert" className="text-sm">
-                    즐겨찾기 변경에 실패했어요.
-                  </p>
-                )}
-
-                <section className="max-w-md rounded-lg border border-white/20 p-4">
-                  <h2 className="mb-3 font-semibold">내 평점</h2>
-
-                  {ratingsQuery.isPending && (
-                    <p className="text-sm">평점 불러오는 중</p>
-                  )}
-                  {ratingsQuery.isError && (
-                    <p role="alert" className="text-sm">
-                      평점을 불러오지 못했어요.
-                    </p>
-                  )}
-
-                  {ratingsQuery.isSuccess && (
-                    <form
-                      key={JSON.stringify([memberId, movieId, myRating])}
-                      className="space-y-3"
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        if (isRatingBusy) return;
-
-                        const formData = new FormData(event.currentTarget);
-                        deleteRatingMutation.reset();
-                        saveRatingMutation.mutate({
-                          score: Number(formData.get("score")),
-                          comment: String(formData.get("comment") ?? "").trim(),
-                        });
-                      }}
+                {memberId === null ? (
+                  <Link
+                    to="/login"
+                    className="mt-5 inline-block text-sm underline"
+                  >
+                    로그인하고 즐겨찾기와 평점 남기기
+                  </Link>
+                ) : (
+                  <div className="mt-5 space-y-4">
+                    <button
+                      type="button"
+                      aria-pressed={isFavorite}
+                      disabled={
+                        !favoriteQuery.isSuccess || favoriteMutation.isPending
+                      }
+                      onClick={() => favoriteMutation.mutate(isFavorite)}
+                      className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${
+                        isFavorite
+                          ? "bg-yellow-400 text-[#111827]"
+                          : "bg-white/15 text-white"
+                      }`}
                     >
-                      <label className="block text-sm">
-                        별점
-                        <select
-                          name="score"
-                          defaultValue={myRating?.score ?? 5}
+                      {favoriteQuery.isPending
+                        ? "즐겨찾기 확인 중"
+                        : isFavorite
+                          ? "★ 즐겨찾기 해제"
+                          : "☆ 즐겨찾기 추가"}
+                    </button>
+
+                    {favoriteQuery.isError && (
+                      <p role="alert" className="text-sm">
+                        즐겨찾기를 불러오지 못했어요.
+                      </p>
+                    )}
+                    {favoriteMutation.isError && (
+                      <p role="alert" className="text-sm">
+                        즐겨찾기 변경에 실패했어요.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {movie.genres.map((genre) => (
+                    <span
+                      key={genre.id}
+                      className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
+                    >
+                      {genre.name}
+                    </span>
+                  ))}
+                </div>
+
+                <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4 text-sm">
+                  <div>
+                    <dt className="text-white/50">개봉일</dt>
+                    <dd className="mt-1 font-medium">
+                      {movie.release_date || "정보 없음"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="text-white/50">상영 시간</dt>
+                    <dd className="mt-1 font-medium">
+                      {movie.runtime != null && movie.runtime > 0
+                        ? `${movie.runtime}분`
+                        : "정보 없음"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              {memberId !== null && (
+                <div className="min-w-0 lg:border-l lg:border-white/15 lg:pl-6">
+                  <section className="max-w-md rounded-lg border border-white/20 p-4">
+                    <h2 className="mb-3 font-semibold">내 평점</h2>
+
+                    {ratingsQuery.isPending && (
+                      <p className="text-sm">평점 불러오는 중</p>
+                    )}
+                    {ratingsQuery.isError && (
+                      <p role="alert" className="text-sm">
+                        평점을 불러오지 못했어요.
+                      </p>
+                    )}
+
+                    {ratingsQuery.isSuccess && (
+                      <form
+                        key={JSON.stringify([memberId, movieId, myRating])}
+                        className="space-y-3"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          if (isRatingBusy) return;
+
+                          const formData = new FormData(event.currentTarget);
+                          deleteRatingMutation.reset();
+                          saveRatingMutation.mutate({
+                            score: Number(formData.get("score")),
+                            comment: String(
+                              formData.get("comment") ?? "",
+                            ).trim(),
+                          });
+                        }}
+                      >
+                        <p className="text-xs text-[#667085]">
+                          별점은 필수, 후기는 선택이에요.
+                        </p>
+
+                        <RatingStars
+                          initialScore={myRating?.score ?? 0}
                           disabled={isRatingBusy}
-                          className="ml-2 rounded bg-white px-2 py-1 text-gray-900"
-                        >
-                          {[1, 2, 3, 4, 5].map((score) => (
-                            <option key={score} value={score}>
-                              {score}점
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                        />
 
-                      <textarea
-                        name="comment"
-                        aria-label="후기"
-                        placeholder="후기 (선택)"
-                        defaultValue={myRating?.comment ?? ""}
-                        maxLength={500}
-                        disabled={isRatingBusy}
-                        className="block w-full rounded bg-white p-2 text-sm text-gray-900"
-                      />
-
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
+                        <textarea
+                          name="comment"
+                          aria-label="영화를 보고 느낀 점"
+                          placeholder="영화를 보고 느낀 점을 남겨보세요."
+                          defaultValue={myRating?.comment ?? ""}
+                          maxLength={500}
                           disabled={isRatingBusy}
-                          className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold disabled:opacity-50"
-                        >
-                          {myRating ? "평점 수정" : "평점 등록"}
-                        </button>
+                          className="block min-h-28 w-full resize-y rounded-lg border border-[#dce1e8] bg-white px-3.5 py-4 text-sm text-[#17191d] placeholder:text-[#8b95a5] focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
 
-                        {myRating && (
+                        <div className="flex gap-2">
                           <button
-                            type="button"
+                            type="submit"
                             disabled={isRatingBusy}
-                            onClick={() => {
-                              saveRatingMutation.reset();
-                              deleteRatingMutation.mutate(myRating.ratingId);
-                            }}
-                            className="rounded border border-white/30 px-3 py-2 text-sm disabled:opacity-50"
+                            className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold disabled:opacity-50"
                           >
-                            평점 삭제
+                            {myRating ? "평점 수정" : "평점 등록"}
                           </button>
-                        )}
-                      </div>
-                    </form>
-                  )}
 
-                  {(saveRatingMutation.isError ||
-                    deleteRatingMutation.isError) && (
-                    <p role="alert" className="mt-2 text-sm">
-                      평점 변경에 실패했어요.
-                    </p>
-                  )}
-                </section>
-              </div>
-            )}
+                          {myRating && (
+                            <button
+                              type="button"
+                              disabled={isRatingBusy}
+                              onClick={() => {
+                                saveRatingMutation.reset();
+                                deleteRatingMutation.mutate(myRating.ratingId);
+                              }}
+                              className="rounded border border-white/30 px-3 py-2 text-sm disabled:opacity-50"
+                            >
+                              평점 삭제
+                            </button>
+                          )}
+                        </div>
+                      </form>
+                    )}
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              {movie.genres.map((genre) => (
-                <span
-                  key={genre.id}
-                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
-                >
-                  {genre.name}
-                </span>
-              ))}
+                    {(saveRatingMutation.isError ||
+                      deleteRatingMutation.isError) && (
+                      <p role="alert" className="mt-2 text-sm">
+                        평점 변경에 실패했어요.
+                      </p>
+                    )}
+                  </section>
+                </div>
+              )}
             </div>
-
-            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4 text-sm">
-              <div>
-                <dt className="text-white/50">개봉일</dt>
-                <dd className="mt-1 font-medium">
-                  {movie.release_date || "정보 없음"}
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-white/50">상영 시간</dt>
-                <dd className="mt-1 font-medium">
-                  {movie.runtime != null && movie.runtime > 0
-                    ? `${movie.runtime}분`
-                    : "정보 없음"}
-                </dd>
-              </div>
-            </dl>
 
             <section className="mt-8 border-t border-white/15 pt-8">
               {movie.tagline && (
