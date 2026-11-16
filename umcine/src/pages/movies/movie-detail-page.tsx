@@ -1,7 +1,8 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
-import { useBookmarkStore } from "../../stores/bookmark-store";
+import { useFavoriteStatusQuery } from "../../hooks/use-favorite-status-query";
+import { useToggleFavorite } from "../../hooks/use-toggle-favorite";
 import { formatRuntime } from "../../utils/movies/format-runtime";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
 import { getTmdbBackdropUrl, getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
@@ -147,17 +148,17 @@ export function MovieDetailPage() {
 }
 
 function DetailBookmarkButton({ movieId }: { movieId: number }) {
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(movieId),
-  );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  const statusQuery = useFavoriteStatusQuery(movieId);
+  const isBookmarked = statusQuery.data?.favorited ?? false;
+  const { toggle, isPending } = useToggleFavorite(movieId, isBookmarked);
 
   return (
     <button
       type="button"
       aria-pressed={isBookmarked}
-      onClick={() => toggleBookmark(movieId)}
-      className="inline-flex h-[42px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white"
+      disabled={isPending || statusQuery.isLoading}
+      onClick={toggle}
+      className="inline-flex h-[42px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white disabled:cursor-not-allowed disabled:bg-action-disabled"
     >
       <img
         src={isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}

@@ -1,15 +1,16 @@
 import { cn } from "../utils/cn";
-import { useBookmarkStore } from "../stores/bookmark-store";
+import { useFavoritesQuery } from "../hooks/use-favorites-query";
+import { useToggleFavorite } from "../hooks/use-toggle-favorite";
 
 interface BookmarkButtonProps {
   movieId: number;
 }
 
 export function BookmarkButton({ movieId }: BookmarkButtonProps) {
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(movieId),
-  );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  // 카드마다 요청하지 않도록, 같은 key의 내 즐겨찾기 목록 하나를 공유해서 확인함
+  const favoritesQuery = useFavoritesQuery();
+  const isBookmarked = favoritesQuery.data?.some((favorite) => favorite.movieId === movieId) ?? false;
+  const { toggle, isPending } = useToggleFavorite(movieId, isBookmarked);
 
   return (
     // 북마크 버튼: 34x34, 포스터 오른쪽 위 10px. 북마크 여부에 따라 색이 바뀌어요.
@@ -20,7 +21,8 @@ export function BookmarkButton({ movieId }: BookmarkButtonProps) {
         isBookmarked ? "border-action bg-action" : "border-white bg-fg",
       )}
       aria-label={isBookmarked ? "북마크 해제" : "북마크 추가"}
-      onClick={() => toggleBookmark(movieId)}
+      disabled={isPending}
+      onClick={toggle}
     >
       <img
         src={isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
