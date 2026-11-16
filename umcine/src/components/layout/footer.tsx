@@ -1,5 +1,4 @@
 
-
 export function Footer() {
     return (
         <footer className="flex items-center justify-end box-border w-[100%] h-[57px] py-4 px-20 border-b border-[#E3E6EB] bg-white">
