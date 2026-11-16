@@ -1,20 +1,45 @@
 import { MovieGrid } from "../../components/movies/movie-grid"
 import { Pagination } from "../../components/movies/pagination"
 //import { getBookmarkMovie } from "../../api/movies/get-movies";
-import type { TmdbMovie } from "../../api/movies/models";
-import { useBookmarkStore } from "../../stores/bookmark-store";
+import type { TmdbMovieListItem } from "../../api/movies/models";
+
 import { getMovies } from "../../api/movies/get-movies";
+import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { Link } from "@tanstack/react-router";
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
+import { useMeQuery } from "../../hooks/use-me-query";
+import { useFavoritesQuery } from "../../hooks/use-favorite-query";
 
 
 
 export function ViewProfilePage() {
 
-
+  const {data: me} = useMeQuery();
+  const {data:favorites = [] } = useFavoritesQuery();
   const [page, setPage] = useState(1);
+
+
+  // 즐겨찾기한 영화 ID로 TMDB 상세 정보 조회
+  const favoriteMovieQueries = useQueries({
+    queries: favorites.map((favorite) => ({
+      queryKey: ["movies", "detail", favorite.movieId],
+      queryFn: () => getMovieDetail(favorite.movieId),
+    })),
+  });
+
+  // 조회가 완료된 영화 데이터만 추출
+  const favoriteMovies: TmdbMovieListItem[] = favoriteMovieQueries
+    .map((query) => query.data)
+    .filter((movie) => movie !== undefined)
+    .map((movie) => ({
+      ...movie,
+      genre_ids: movie.genres.map((genre) => genre.id),
+    }));
+
+
 
   const changePage = (nextPage: number) => {
     setPage(nextPage);
@@ -24,19 +49,6 @@ export function ViewProfilePage() {
     queryKey: ["movies", "list", { page }],
     queryFn: () => getMovies({ page }),
   })
-
-
-
-
-  const bookmarkedMovieIds = useBookmarkStore(
-    (state) => state.bookmarkedMovieIds
-  );
-
-
-  const movies = moviesQuery.data?.results ?? [];
-  const bookmarkedMovies = movies.filter((movie : TmdbMovie) =>
-    bookmarkedMovieIds.includes(movie.id)
-  );
 
   const totalPages = moviesQuery.data?.total_pages ?? 0;
 
@@ -68,13 +80,13 @@ export function ViewProfilePage() {
               />
               <div className="flex flex-col">
                 <p className="text-[11px] font-regular text-[#969DA8]">닉네임</p>
-                <p className="text-[14px] font-bold">gs0428</p>
+                <p className="text-[14px] font-bold">{me?.nickname}</p>
               </div>
             </div>
 
             <div>
               <p className="text-[11px] font-regular text-[#969DA8]">이메일</p>
-              <p className="text-[14px] font-bold">gwangsoo@cinemalab.kr</p>
+              <p className="text-[14px] font-bold">{me?.email}</p>
             </div>
           </div>
 
@@ -84,7 +96,7 @@ export function ViewProfilePage() {
           <h2 className="text-[17px] font-bold">내 즐겨찾기</h2>
 
           <MovieGrid
-            movies={bookmarkedMovies}
+            movies={favoriteMovies}
           />
 
           <div className="flex justify-center self-center w-full">

@@ -117,16 +117,6 @@ export function SignupPage() {
 
 			alert("중복 확인에 실패했어요. 콘솔을 확인해주세요.");
 		}
-			
-		/*
-		catch {
-			setDuplicateCheck((prev) => ({
-				...prev,
-				[key]: { ...prev[key], isAvailable: false },
-			}));
-			
-			alert("중복 확인에 실패했어요. 다시 시도해주세요.");
-		} */
 		
 		finally {
 			setDuplicateCheck((prev) => ({
