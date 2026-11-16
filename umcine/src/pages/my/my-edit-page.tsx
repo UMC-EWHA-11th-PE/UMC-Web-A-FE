@@ -1,36 +1,70 @@
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
+import type { MemberInfo } from "../../api/members/me";
 import { FormField, InputBox } from "../../components/auth/form-field";
 import {
   CHECK_BUTTON_CLASS_NAME,
   INPUT_CLASS_NAME,
 } from "../../components/auth/form-field-styles";
+import { useMeQuery } from "../../hooks/use-me-query";
+import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
+import { useAuthStore } from "../../stores/auth-store";
 import { useProfileStore } from "../../stores/profile-store";
 import { resizeImageToDataUrl } from "../../utils/resize-image";
 
 export function MyEditPage() {
-  const profile = useProfileStore((state) => state.profile);
-  const updateProfile = useProfileStore((state) => state.updateProfile);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const meQuery = useMeQuery();
+
+  // 접근 제한은 필수 미션(로그인 전용 Route Group)에서 처리. 그전까지는 안내만 보여줌
+  if (!accessToken) {
+    return (
+      <main className="px-20 py-6 text-sm text-fg-secondary">
+        로그인이 필요해요.{" "}
+        <Link to="/login" className="font-bold text-action">
+          로그인
+        </Link>
+      </main>
+    );
+  }
+
+  if (meQuery.isPending) {
+    return <main className="px-20 py-6 text-sm text-fg-secondary">내 정보를 불러오는 중이에요.</main>;
+  }
+
+  if (meQuery.isError) {
+    return <main className="px-20 py-6 text-sm text-fg-secondary">내 정보를 불러오지 못했어요.</main>;
+  }
+
+  // 내 정보를 받은 뒤에 폼을 그려서, 입력칸이 서버의 닉네임으로 시작하게 함
+  return <MyEditForm me={meQuery.data} />;
+}
+
+function MyEditForm({ me }: { me: MemberInfo }) {
+  const storedProfileImage = useProfileStore((state) => state.profileImage);
+  const setStoredProfileImage = useProfileStore((state) => state.setProfileImage);
+  const updateMeMutation = useUpdateMeMutation();
   const navigate = useNavigate();
 
-  // 저장된 닉네임으로 시작해서, 저장 버튼을 누르기 전까지는 화면 안에서만 바뀜
-  const [nickname, setNickname] = useState(profile.nickname);
+  // 서버의 닉네임으로 시작해서, 저장 버튼을 누르기 전까지는 화면 안에서만 바뀜
+  const [nickname, setNickname] = useState(me.nickname);
   // 중복 확인을 통과한 닉네임. 값을 바꾸면 다시 확인해야 함
   const [checkedNickname, setCheckedNickname] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   // 저장된 이미지로 시작해서, 새로 고르면 줄인 이미지로 바뀜 (예전 저장값에는 이 필드가 없을 수 있음)
-  const [profileImage, setProfileImage] = useState(profile.profileImage ?? null);
+  const [profileImage, setProfileImage] = useState(storedProfileImage ?? null);
 
   const trimmedNickname = nickname.trim();
   const isNicknameValid = trimmedNickname.length >= 2 && trimmedNickname.length <= 12;
-  const isNicknameChanged = trimmedNickname !== profile.nickname;
+  const isNicknameChanged = trimmedNickname !== me.nickname;
   const showNicknameError = nickname.length > 0 && !isNicknameValid;
 
   // 닉네임을 그대로 두거나, 바꾼 닉네임이 중복 확인을 통과해야 저장 가능
   const canSave =
     isNicknameValid &&
     !isChecking &&
+    !updateMeMutation.isPending &&
     (!isNicknameChanged || checkedNickname === trimmedNickname);
 
   const handleChangeNickname = (value: string) => {
@@ -71,9 +105,19 @@ export function MyEditPage() {
     event.preventDefault();
     if (!canSave) return;
 
-    // 내 정보 수정 API는 8주차에 연결. 지금은 store에 저장해 조회 화면에 반영함
-    updateProfile({ ...profile, nickname: trimmedNickname, profileImage });
-    navigate({ to: "/my" });
+    // 프로필 이미지는 브라우저에 저장하고 내 정보 화면으로 돌아감
+    const finish = () => {
+      setStoredProfileImage(profileImage);
+      navigate({ to: "/my" });
+    };
+
+    // 닉네임을 바꾸지 않았으면 서버에 보낼 게 없음
+    if (!isNicknameChanged) {
+      finish();
+      return;
+    }
+
+    updateMeMutation.mutate({ nickname: trimmedNickname }, { onSuccess: finish });
   };
 
   return (
@@ -93,7 +137,7 @@ export function MyEditPage() {
             disabled={!canSave}
             className="h-[42px] cursor-pointer rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed disabled:cursor-not-allowed disabled:bg-action-disabled"
           >
-            변경사항 저장
+            {updateMeMutation.isPending ? "저장 중" : "변경사항 저장"}
           </button>
         </div>
 
@@ -162,7 +206,7 @@ export function MyEditPage() {
                 <input
                   id="edit-email"
                   type="email"
-                  value={profile.email}
+                  value={me.email}
                   readOnly
                   className={INPUT_CLASS_NAME}
                 />

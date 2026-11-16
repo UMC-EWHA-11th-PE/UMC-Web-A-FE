@@ -7,12 +7,14 @@ import MovieGrid from "../../components/movies/movie-grid";
 import Pagination from "../../components/movies/pagination";
 import { useBookmarkStore } from "../../stores/bookmark-store";
 import { useProfileStore } from "../../stores/profile-store";
+import { useMeQuery } from "../../hooks/use-me-query";
 
 // 영화 목록과 같은 5열 그리드를 2줄씩 보여줌
 const BOOKMARKS_PER_PAGE = 10;
 
 export function MyPage() {
-  const profile = useProfileStore((state) => state.profile);
+  const meQuery = useMeQuery();
+  const profileImage = useProfileStore((state) => state.profileImage);
   const bookmarkedMovieIds = useBookmarkStore((state) => state.bookmarkedMovieIds);
   const [page, setPage] = useState(1);
 
@@ -59,11 +61,15 @@ export function MyPage() {
       <section className="flex flex-col gap-4 border-t border-line py-5">
         <h2 className="text-sm leading-[17px] font-bold text-fg">기본 정보</h2>
         <div className="flex items-center gap-6">
-          <ProfileAvatar image={profile.profileImage ?? null} />
-          <dl className="grid flex-1 grid-cols-2 gap-6">
-            <ProfileItem label="닉네임" value={profile.nickname} />
-            <ProfileItem label="이메일" value={profile.email} />
-          </dl>
+          <ProfileAvatar image={profileImage ?? null} />
+          {meQuery.isError ? (
+            <p className="text-sm text-fg-secondary">내 정보를 불러오지 못했어요.</p>
+          ) : (
+            <dl className="grid flex-1 grid-cols-2 gap-6">
+              <ProfileItem label="닉네임" value={meQuery.data?.nickname ?? "불러오는 중"} />
+              <ProfileItem label="이메일" value={meQuery.data?.email ?? "불러오는 중"} />
+            </dl>
+          )}
         </div>
       </section>
 

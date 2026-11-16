@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { cn } from "../../utils/cn";
-import { getMe } from "../../api/members/me";
+import { useMeQuery } from "../../hooks/use-me-query";
 import { useAuthStore } from "../../stores/auth-store";
 
 interface NavLinkProps {
@@ -32,16 +31,8 @@ export default function Header() {
   const isSearchActive = pathname.startsWith("/search");
   const isMyActive = pathname.startsWith("/my");
 
-  // 토큰이 있을 때만 내 정보를 조회한다. 내 정보는 자주 바뀌지 않아서 5분 동안 최신으로 본다
   const accessToken = useAuthStore((state) => state.accessToken);
-  const meQuery = useQuery({
-    queryKey: ["members", "me"],
-    queryFn: getMe,
-    enabled: Boolean(accessToken),
-    staleTime: 5 * 60 * 1000,
-    // 401로 토큰을 지운 뒤 같은 조회를 다시 시도하지 않도록 재시도를 끔
-    retry: false,
-  });
+  const meQuery = useMeQuery();
 
   return (
     <header className="flex h-[91px] items-center justify-between border-b border-line bg-surface px-20 py-6">
