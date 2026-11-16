@@ -1,36 +1,41 @@
-import MovieGrid from "@/components/movies/movie-grid";
-import Pagination from "../../components/movies/pagination";
-//import { getBookmarkMovie } from "../../api/movies/get-movies";
-import type { TmdbMovie } from "../../api/movies/models";
-import { useBookmarkStore } from "@/stores/bookmark-store";
-import { getMovies } from "../../api/movies/get-movies";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { deleteFavorite } from "../../api/favorites/delete-favorite";
+import { getFavorites } from "../../api/favorites/get-favorites";
+import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import MovieGrid from "@/components/movies/movie-grid";
 
 export function ViewProfilePage() {
-  const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
 
-  const changePage = (nextPage: number) => {
-    setPage(nextPage);
-  };
-
-  const moviesQuery = useQuery({
-    queryKey: ["movies", "list", { page }],
-    queryFn: () => getMovies({ page }),
+  const favoritesQuery = useQuery({
+    queryKey: ["favorites", "list"],
+    queryFn: getFavorites,
   });
 
-  const bookmarkedMovieIds = useBookmarkStore(
-    (state) => state.bookmarkedMovieIds,
-  );
+  const favorites = favoritesQuery.data ?? [];
 
-  const movies = moviesQuery.data?.results ?? [];
-  const bookmarkedMovies = movies.filter((movie: TmdbMovie) =>
-    bookmarkedMovieIds.includes(movie.id),
-  );
+  const favoriteMovieQueries = useQueries({
+    queries: favorites.map(({ movieId }) => ({
+      queryKey: ["movies", "detail", movieId],
+      queryFn: () => getMovieDetail(movieId),
+    })),
+  });
 
-  const totalPages = moviesQuery.data?.total_pages ?? 0;
+  const removeFavorite = useMutation({
+    mutationFn: deleteFavorite,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["favorites", "list"] }),
+        queryClient.invalidateQueries({ queryKey: ["favorites", "detail"] }),
+      ]);
+    },
+  });
 
   return (
     <div className="flex w-full justify-center mx-12">
@@ -69,19 +74,69 @@ export function ViewProfilePage() {
           </div>
         </div>
 
-        <div className="flex flex-col my-5 gap-4">
+        <section className="my-5 flex flex-col gap-4">
           <h2 className="text-[17px] font-bold">내 즐겨찾기</h2>
 
-          <MovieGrid movies={bookmarkedMovies} />
+          {favoritesQuery.isPending && <p>즐겨찾기를 불러오는 중이에요.</p>}
+          {favoritesQuery.isError && (
+            <p role="alert">즐겨찾기를 불러오지 못했어요.</p>
+          )}
+          {favoritesQuery.isSuccess && favorites.length === 0 && (
+            <p>아직 즐겨찾기한 영화가 없어요.</p>
+          )}
+          {removeFavorite.isError && (
+            <p role="alert">
+              즐겨찾기를 해제하지 못했어요. 다시 시도해 주세요.
+            </p>
+          )}
 
-          <div className="flex justify-center self-center w-full">
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={changePage}
-            />
-          </div>
-        </div>
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {favorites.map(({ movieId }, index) => {
+              const movieQuery = favoriteMovieQueries[index];
+              const movie = movieQuery?.data;
+
+              return (
+                <li
+                  key={movieId}
+                  className="overflow-hidden rounded-lg border border-[#E3E6EB]"
+                >
+                  <Link
+                    to="/movies/$movieId"
+                    params={{ movieId: String(movieId) }}
+                    className="block text-inherit no-underline"
+                  >
+                    {movie?.poster_path ? (
+                      <img
+                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                        alt=""
+                        className="aspect-[2/3] w-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid aspect-[2/3] place-items-center bg-gray-100 text-xs text-gray-500">
+                        {movieQuery?.isPending ? "불러오는 중" : "포스터 없음"}
+                      </div>
+                    )}
+                    <p className="p-3 text-sm font-semibold">
+                      {movie?.title ?? `영화 #${movieId}`}
+                    </p>
+                  </Link>
+
+                  <button
+                    type="button"
+                    disabled={removeFavorite.isPending}
+                    onClick={() => removeFavorite.mutate(movieId)}
+                    className="mx-3 mb-3 rounded-md border px-3 py-1.5 text-xs disabled:opacity-50"
+                  >
+                    {removeFavorite.isPending &&
+                    removeFavorite.variables === movieId
+                      ? "해제 중"
+                      : "즐겨찾기 해제"}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       </div>
     </div>
   );

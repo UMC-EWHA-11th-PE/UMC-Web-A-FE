@@ -1,7 +1,32 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getFavorite } from "../../api/favorites/get-favorite";
+import { addFavorite } from "../../api/favorites/add-favorite";
+import { deleteFavorite } from "../../api/favorites/delete-favorite";
+import { getMemberRatings } from "../../api/ratings/get-member-ratings";
+import { createRating } from "../../api/ratings/create-ratings";
+import { updateRating } from "../../api/ratings/update-ratings";
+import { deleteRating } from "../../api/ratings/delete-ratings";
+import { useAuthStore } from "../../stores/auth-store";
 import { Link, useParams } from "@tanstack/react-router";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
-import { useBookmarkStore } from "../../../stores/bookmark-store";
+
+function getMemberId(accessToken: string | null): number | null {
+  if (!accessToken) return null;
+
+  try {
+    const payload = accessToken.split(".")[1];
+    if (!payload) return null;
+
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const { sub } = JSON.parse(atob(base64)) as { sub?: unknown };
+    if (typeof sub !== "string") return null;
+
+    const memberId = Number(sub);
+    return Number.isSafeInteger(memberId) && memberId > 0 ? memberId : null;
+  } catch {
+    return null;
+  }
+}
 
 export function MovieDetailPage() {
   const { movieId: movieIdParam } = useParams({
@@ -19,10 +44,70 @@ export function MovieDetailPage() {
 
   const movie = movieDetailQuery.data;
 
-  const isBookmarked = useBookmarkStore((state) =>
-    state.bookmarkedMovieIds.includes(movieId),
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const memberId = getMemberId(accessToken);
+  const queryClient = useQueryClient();
+
+  const favoriteKey = ["favorites", "detail", memberId, movieId] as const;
+  const ratingsKey = ["ratings", "member", memberId] as const;
+
+  const favoriteQuery = useQuery({
+    queryKey: favoriteKey,
+    queryFn: () => getFavorite(movieId),
+    enabled: memberId !== null && isValidMovieId,
+  });
+
+  const ratingsQuery = useQuery({
+    queryKey: ratingsKey,
+    queryFn: () => getMemberRatings(memberId!),
+    enabled: memberId !== null && isValidMovieId,
+  });
+
+  const myRating = ratingsQuery.data?.find(
+    (rating) => rating.movieId === movieId,
   );
-  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  const isFavorite = favoriteQuery.data === true;
+
+  const favoriteMutation = useMutation({
+    mutationFn: async (currentlyFavorited: boolean): Promise<void> => {
+      if (currentlyFavorited) {
+        await deleteFavorite(movieId);
+      } else {
+        await addFavorite(movieId);
+      }
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: favoriteKey }),
+        queryClient.invalidateQueries({ queryKey: ["favorites", "list"] }),
+      ]);
+    },
+  });
+
+  const saveRatingMutation = useMutation({
+    mutationFn: async ({
+      score,
+      comment,
+    }: {
+      score: number;
+      comment: string;
+    }) => {
+      if (myRating) {
+        await updateRating(myRating.ratingId, { score, comment });
+      } else {
+        await createRating({ movieId, score, comment });
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ratingsKey }),
+  });
+
+  const deleteRatingMutation = useMutation({
+    mutationFn: deleteRating,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ratingsKey }),
+  });
+
+  const isRatingBusy =
+    saveRatingMutation.isPending || deleteRatingMutation.isPending;
 
   const statusMessage = !isValidMovieId
     ? "올바르지 않은 영화 번호예요."
@@ -96,18 +181,132 @@ export function MovieDetailPage() {
               {movie.original_title}
             </p>
 
-            <button
-              type="button"
-              aria-pressed={isBookmarked}
-              onClick={() => toggleBookmark(movie.id)}
-              className={`mt-5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                isBookmarked
-                  ? "bg-yellow-400 text-[#111827] hover:bg-yellow-300"
-                  : "bg-white/15 text-white hover:bg-white/25"
-              }`}
-            >
-              {isBookmarked ? "★ 북마크 해제" : "☆ 북마크 추가"}
-            </button>
+            {memberId === null ? (
+              <Link to="/login" className="mt-5 inline-block text-sm underline">
+                로그인하고 즐겨찾기와 평점 남기기
+              </Link>
+            ) : (
+              <div className="mt-5 space-y-4">
+                <button
+                  type="button"
+                  aria-pressed={isFavorite}
+                  disabled={
+                    !favoriteQuery.isSuccess || favoriteMutation.isPending
+                  }
+                  onClick={() => favoriteMutation.mutate(isFavorite)}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${
+                    isFavorite
+                      ? "bg-yellow-400 text-[#111827]"
+                      : "bg-white/15 text-white"
+                  }`}
+                >
+                  {favoriteQuery.isPending
+                    ? "즐겨찾기 확인 중"
+                    : isFavorite
+                      ? "★ 즐겨찾기 해제"
+                      : "☆ 즐겨찾기 추가"}
+                </button>
+
+                {favoriteQuery.isError && (
+                  <p role="alert" className="text-sm">
+                    즐겨찾기를 불러오지 못했어요.
+                  </p>
+                )}
+                {favoriteMutation.isError && (
+                  <p role="alert" className="text-sm">
+                    즐겨찾기 변경에 실패했어요.
+                  </p>
+                )}
+
+                <section className="max-w-md rounded-lg border border-white/20 p-4">
+                  <h2 className="mb-3 font-semibold">내 평점</h2>
+
+                  {ratingsQuery.isPending && (
+                    <p className="text-sm">평점 불러오는 중</p>
+                  )}
+                  {ratingsQuery.isError && (
+                    <p role="alert" className="text-sm">
+                      평점을 불러오지 못했어요.
+                    </p>
+                  )}
+
+                  {ratingsQuery.isSuccess && (
+                    <form
+                      key={JSON.stringify([memberId, movieId, myRating])}
+                      className="space-y-3"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        if (isRatingBusy) return;
+
+                        const formData = new FormData(event.currentTarget);
+                        deleteRatingMutation.reset();
+                        saveRatingMutation.mutate({
+                          score: Number(formData.get("score")),
+                          comment: String(formData.get("comment") ?? "").trim(),
+                        });
+                      }}
+                    >
+                      <label className="block text-sm">
+                        별점
+                        <select
+                          name="score"
+                          defaultValue={myRating?.score ?? 5}
+                          disabled={isRatingBusy}
+                          className="ml-2 rounded bg-white px-2 py-1 text-gray-900"
+                        >
+                          {[1, 2, 3, 4, 5].map((score) => (
+                            <option key={score} value={score}>
+                              {score}점
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <textarea
+                        name="comment"
+                        aria-label="후기"
+                        placeholder="후기 (선택)"
+                        defaultValue={myRating?.comment ?? ""}
+                        maxLength={500}
+                        disabled={isRatingBusy}
+                        className="block w-full rounded bg-white p-2 text-sm text-gray-900"
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={isRatingBusy}
+                          className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                        >
+                          {myRating ? "평점 수정" : "평점 등록"}
+                        </button>
+
+                        {myRating && (
+                          <button
+                            type="button"
+                            disabled={isRatingBusy}
+                            onClick={() => {
+                              saveRatingMutation.reset();
+                              deleteRatingMutation.mutate(myRating.ratingId);
+                            }}
+                            className="rounded border border-white/30 px-3 py-2 text-sm disabled:opacity-50"
+                          >
+                            평점 삭제
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  )}
+
+                  {(saveRatingMutation.isError ||
+                    deleteRatingMutation.isError) && (
+                    <p role="alert" className="mt-2 text-sm">
+                      평점 변경에 실패했어요.
+                    </p>
+                  )}
+                </section>
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2">
               {movie.genres.map((genre) => (

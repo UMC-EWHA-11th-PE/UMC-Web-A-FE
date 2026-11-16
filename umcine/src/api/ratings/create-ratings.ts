@@ -7,16 +7,13 @@ interface CreateRatingInput {
 }
 
 interface CreateRatingResponse {
-  result: number;
+  result: { ratingId: number };
 }
 
-export async function createRating(
-  memberId: number,
-  input: CreateRatingInput,
-): Promise<number> {
+export async function createRating(input: CreateRatingInput): Promise<number> {
   const response = await authApi
-    .post(`members/${memberId}/ratings`, { json: input })
+    .post("ratings", { json: input })
     .json<CreateRatingResponse>();
 
-  return response.result;
+  return response.result.ratingId;
 }
