@@ -1,20 +1,12 @@
-import { useState, type SubmitEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
-import { signup } from "../../api/members/signup";
-
-// import { useNavigate } from "@tanstack/react-router";
+import { useSignupMutation } from "../../hooks/use-signup-mutation";
 
 const DEFAULT_DUPLICATE_CHECK = {
   isChecking: false,
   isAvailable: false,
 };
-
-type DuplicateCheckKey = "email" | "nickname";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
 
 const DEFAULT_FORM = {
   email: "",
@@ -23,20 +15,25 @@ const DEFAULT_FORM = {
   passwordConfirm: "",
 };
 
-type DefaultFormKey = keyof typeof DEFAULT_FORM;
-type DefaultFormValue = (typeof DEFAULT_FORM)[DefaultFormKey];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+
+type DuplicateCheckKey = "email" | "nickname";
+type FormField = keyof typeof DEFAULT_FORM;
 
 export function SignupPage() {
   const [form, setForm] = useState(DEFAULT_FORM);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [duplicateCheck, setDuplicateCheck] = useState({
     email: DEFAULT_DUPLICATE_CHECK,
     nickname: DEFAULT_DUPLICATE_CHECK,
   });
 
+  const signupMutation = useSignupMutation();
+
   const isEmailValid = EMAIL_REGEX.test(form.email.trim());
-  const isNicknameValid =
-    form.nickname.trim().length >= 2 && form.nickname.trim().length <= 12;
+  const nicknameLength = form.nickname.trim().length;
+  const isNicknameValid = nicknameLength >= 2 && nicknameLength <= 12;
   const isPasswordValid = PASSWORD_REGEX.test(form.password);
   const isPasswordConfirmValid =
     form.passwordConfirm.length > 0 && form.password === form.passwordConfirm;
@@ -47,41 +44,27 @@ export function SignupPage() {
   const showPasswordConfirmError =
     form.passwordConfirm.length > 0 && !isPasswordConfirmValid;
 
-  const isFormValid =
+  const canSubmit =
     isEmailValid &&
     isNicknameValid &&
     isPasswordValid &&
-    isPasswordConfirmValid;
-
-  const canSubmit =
-    isFormValid &&
+    isPasswordConfirmValid &&
     duplicateCheck.email.isAvailable &&
     duplicateCheck.nickname.isAvailable;
 
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!canSubmit || isSubmitting) return;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-    setIsSubmitting(true);
+    if (!canSubmit || signupMutation.isPending) return;
 
-    try {
-      const response = await signup({
-        email: form.email.trim(),
-        nickname: form.nickname.trim(),
-        password: form.password,
-      });
-
-      alert(response.message);
-      // 로그인 페이지 연결 후 추가
-      // navigate({ to: "/login" });
-    } catch {
-      alert("회원가입에 실패했어요. 다시 시도해 주세요.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    signupMutation.mutate({
+      email: form.email.trim(),
+      nickname: form.nickname.trim(),
+      password: form.password,
+    });
   };
 
-  const handleChangeField = (key: DefaultFormKey, value: DefaultFormValue) => {
+  const handleChangeField = (key: FormField, value: string) => {
     if (key === "email" || key === "nickname") {
       if (duplicateCheck[key].isChecking) return;
 
@@ -113,7 +96,7 @@ export function SignupPage() {
 
       setDuplicateCheck((prev) => ({
         ...prev,
-        [key]: { isChecking: true, isAvailable: response.available },
+        [key]: { isChecking: false, isAvailable: response.available },
       }));
 
       alert(
@@ -126,14 +109,13 @@ export function SignupPage() {
 
       setDuplicateCheck((prev) => ({
         ...prev,
-        [key]: { ...prev[key], isAvailable: false },
+        [key]: DEFAULT_DUPLICATE_CHECK,
       }));
 
       alert("중복 확인에 실패했어요. 다시 시도해 주세요.");
     }
   };
 
-  // JSX에서 이벤트 타입을 추론하도록 합니다.
   const inputClass =
     "h-12 w-full rounded-lg border bg-white px-4 text-sm text-gray-900 " +
     "placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500";
@@ -167,7 +149,9 @@ export function SignupPage() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 value={form.email}
-                onChange={(e) => handleChangeField("email", e.target.value)}
+                onChange={(event) =>
+                  handleChangeField("email", event.target.value)
+                }
                 className={`${getInputClass(showEmailError)} pr-24`}
                 aria-invalid={showEmailError}
                 aria-describedby={showEmailError ? "email-error" : undefined}
@@ -203,7 +187,9 @@ export function SignupPage() {
                 autoComplete="nickname"
                 placeholder="2~12자"
                 value={form.nickname}
-                onChange={(e) => handleChangeField("nickname", e.target.value)}
+                onChange={(event) =>
+                  handleChangeField("nickname", event.target.value)
+                }
                 className={`${getInputClass(showNicknameError)} pr-24`}
                 aria-invalid={showNicknameError}
                 aria-describedby={
@@ -242,7 +228,9 @@ export function SignupPage() {
               autoComplete="new-password"
               placeholder="8자 이상"
               value={form.password}
-              onChange={(e) => handleChangeField("password", e.target.value)}
+              onChange={(event) =>
+                handleChangeField("password", event.target.value)
+              }
               className={getInputClass(showPasswordError)}
               aria-invalid={showPasswordError}
               aria-describedby="password-help"
@@ -272,8 +260,8 @@ export function SignupPage() {
               autoComplete="new-password"
               placeholder="다시 입력"
               value={form.passwordConfirm}
-              onChange={(e) =>
-                handleChangeField("passwordConfirm", e.target.value)
+              onChange={(event) =>
+                handleChangeField("passwordConfirm", event.target.value)
               }
               className={getInputClass(showPasswordConfirmError)}
               aria-invalid={showPasswordConfirmError}
@@ -293,14 +281,14 @@ export function SignupPage() {
 
           <button
             type="submit"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || signupMutation.isPending}
             className="h-12 w-full rounded-lg bg-blue-600 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? "가입 중" : "가입하기"}
+            {signupMutation.isPending ? "가입 중" : "가입하기"}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-500">
           이미 계정이 있나요?{" "}
           <a
             href="/login"
