@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
 import type { MemberInfo } from "../../api/members/me";
 import { FormField, InputBox } from "../../components/auth/form-field";
@@ -9,25 +9,11 @@ import {
 } from "../../components/auth/form-field-styles";
 import { useMeQuery } from "../../hooks/use-me-query";
 import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
-import { useAuthStore } from "../../stores/auth-store";
 import { useProfileStore } from "../../stores/profile-store";
 import { resizeImageToDataUrl } from "../../utils/resize-image";
 
 export function MyEditPage() {
-  const accessToken = useAuthStore((state) => state.accessToken);
   const meQuery = useMeQuery();
-
-  // 접근 제한은 필수 미션(로그인 전용 Route Group)에서 처리. 그전까지는 안내만 보여줌
-  if (!accessToken) {
-    return (
-      <main className="px-20 py-6 text-sm text-fg-secondary">
-        로그인이 필요해요.{" "}
-        <Link to="/login" className="font-bold text-action">
-          로그인
-        </Link>
-      </main>
-    );
-  }
 
   if (meQuery.isPending) {
     return <main className="px-20 py-6 text-sm text-fg-secondary">내 정보를 불러오는 중이에요.</main>;
