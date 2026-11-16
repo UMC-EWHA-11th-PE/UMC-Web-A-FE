@@ -1,15 +1,30 @@
-
-import { useState, type SubmitEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  getProfile,
-  saveProfile,
-} from "../../utils/profile-storage";
+import { useQuery } from "@tanstack/react-query";
+import { getMe } from "../../api/members/me";
+import { useAuthStore } from "../../stores/auth-store";
+import { useUpdateMeMutation } from "../../hooks/use-update-me-mutation";
 
 export function EditProfilePage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(() => getProfile());
-  const [nickname, setNickname] = useState(profile.nickname);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const [nickname, setNickname] = useState("");
+
+  const meQuery = useQuery({
+    queryKey: ["members", "me"],
+    queryFn: getMe,
+    enabled: Boolean(accessToken),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const updateMeMutation = useUpdateMeMutation();
+
+  useEffect(() => {
+    if (meQuery.data) {
+      setNickname(meQuery.data.nickname);
+    }
+  }, [meQuery.data]);
 
   const isNicknameValid =
     nickname.trim().length >= 2 &&
@@ -17,19 +32,45 @@ export function EditProfilePage() {
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!isNicknameValid) return;
 
-    const updatedProfile = {
-      ...profile,
+    if (!isNicknameValid || updateMeMutation.isPending) return;
+
+    updateMeMutation.mutate({
       nickname: nickname.trim(),
-    };
-
-    saveProfile(updatedProfile);
-    setProfile(updatedProfile);
-
-    alert("내 정보가 수정되었어요.");
-    navigate({ to: "/mypage" });
+    });
   }
+
+  if (!accessToken) {
+    return (
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#f8f9fa]">
+        <p className="text-sm text-gray-500">
+          로그인이 필요합니다.
+        </p>
+      </main>
+    );
+  }
+
+  if (meQuery.isPending) {
+    return (
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#f8f9fa]">
+        <p className="text-sm text-gray-500">
+          내 정보를 불러오는 중...
+        </p>
+      </main>
+    );
+  }
+
+  if (meQuery.isError) {
+    return (
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#f8f9fa]">
+        <p className="text-sm text-red-500">
+          내 정보를 불러오지 못했어요.
+        </p>
+      </main>
+    );
+  }
+
+  const profile = meQuery.data;
 
   return (
     <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#f8f9fa] px-5 py-12">
@@ -82,10 +123,10 @@ export function EditProfilePage() {
 
           <button
             type="submit"
-            disabled={!isNicknameValid}
+            disabled={!isNicknameValid || updateMeMutation.isPending}
             className="w-full rounded-md bg-[#4b63e6] py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            수정 완료
+            {updateMeMutation.isPending ? "저장 중" : "수정 완료"}
           </button>
 
           <button

@@ -1,9 +1,12 @@
 import { useState, type SubmitEvent } from "react";
 import { Link } from "@tanstack/react-router";
+import { useLoginMutation } from "../../hooks/use-login-mutation";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const loginMutation = useLoginMutation();
 
   const isFormValid =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
@@ -11,9 +14,13 @@ export function LoginPage() {
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!isFormValid) return;
 
-    alert("입력 확인 완료! 실제 로그인 API는 아직 연결되지 않았어요.");
+    if (!isFormValid || loginMutation.isPending) return;
+
+    loginMutation.mutate({
+      email: email.trim(),
+      password,
+    });
   }
 
   return (
@@ -62,10 +69,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={!isFormValid}
+            disabled={!isFormValid || loginMutation.isPending}
             className="w-full rounded-md bg-[#4b63e6] py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            로그인
+            {loginMutation.isPending ? "로그인 중" : "로그인"}
           </button>
         </form>
 

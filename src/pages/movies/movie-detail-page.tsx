@@ -2,6 +2,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { BookmarkButton } from "../../components/bookmark-button";
+import { MovieRatingSection } from "../../components/movie-rating-section";
 import {
   getTmdbBackdropUrl,
   getTmdbPosterUrl,
@@ -144,6 +145,8 @@ export function MovieDetailPage() {
             </p>
           </div>
         </div>
+
+        <MovieRatingSection movieId={movie.id} />
       </section>
     </main>
   );
