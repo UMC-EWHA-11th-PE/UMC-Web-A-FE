@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { cn } from "../../utils/cn";
 
 interface NavLinkProps {
-  to: "/" | "/search";
+  to: "/" | "/search" | "/my";
   active: boolean;
   children: string;
 }
@@ -27,6 +27,7 @@ export default function Header() {
   // 영화 목록(/)과 영화 상세(/movies/...)는 "영화" 메뉴, 검색(/search)은 "검색" 메뉴가 활성 상태예요.
   const isMovieActive = pathname === "/" || pathname.startsWith("/movies");
   const isSearchActive = pathname.startsWith("/search");
+  const isMyActive = pathname.startsWith("/my");
 
   return (
     <header className="flex h-[91px] items-center justify-between border-b border-line bg-surface px-20 py-6">
@@ -42,6 +43,7 @@ export default function Header() {
         <nav className="flex items-center gap-[30px]">
           <NavLink to="/" active={isMovieActive}>영화</NavLink>
           <NavLink to="/search" active={isSearchActive}>검색</NavLink>
+          <NavLink to="/my" active={isMyActive}>내 정보</NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-2.5">
@@ -56,12 +58,12 @@ export default function Header() {
             className="size-6 bg-fg-secondary mask-[url('/icons/search.svg')] mask-center mask-no-repeat"
           />
         </Link>
-        <button
-          type="button"
-          className="h-[42px] cursor-pointer rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
+        <Link
+          to="/login"
+          className="flex h-[42px] cursor-pointer items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
         >
           로그인
-        </button>
+        </Link>
       </div>
     </header>
   );
