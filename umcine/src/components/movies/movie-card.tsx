@@ -1,7 +1,10 @@
 import type {TmdbMovieListItem} from "../../api/movies/models.ts";
-import {Link} from "@tanstack/react-router";
+import {useQuery} from "@tanstack/react-query";
+import {Link, useNavigate} from "@tanstack/react-router";
+import {favoriteQueries} from "../../api/favorites/favorite-queries.ts";
+import {useToggleFavoriteMutation} from "../../hooks/use-toggle-favorite-mutation.ts";
+import {useAuthStore} from "../../stores/auth-store.ts";
 import {cn} from "../../utils/cn.ts";
-import {useBookmarkStore} from "../../stores/bookmark-store.ts";
 import {getTmdbPosterUrl} from "../../utils/movies/tmdb-image.ts";
 
 interface MovieCardProps{
@@ -9,8 +12,23 @@ interface MovieCardProps{
 }
 
 export default function MovieCard({movie}: MovieCardProps){
-    const isBookmarked=useBookmarkStore((state)=>state.bookmarkedMovieIds.includes(movie.id));
-    const toggleBookmark=useBookmarkStore((state)=>state.toggleBookmark);
+    const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
+    const navigate = useNavigate();
+    // 카드마다 상태를 따로 요청하지 않고 즐겨찾기 목록 하나를 같이 쓴다
+    const favoriteQuery = useQuery({
+        ...favoriteQueries.list(isLoggedIn),
+        select: (favorites) => favorites.some((favorite) => favorite.movieId === movie.id),
+    });
+    const toggleMutation = useToggleFavoriteMutation(movie.id);
+    const isBookmarked = isLoggedIn && favoriteQuery.data === true;
+
+    const handleToggleBookmark = () => {
+        if (!isLoggedIn) {
+            void navigate({to: "/login"});
+            return;
+        }
+        toggleMutation.mutate(isBookmarked);
+    };
     const posterUrl = getTmdbPosterUrl(movie.poster_path);
 
     return(
@@ -35,7 +53,8 @@ export default function MovieCard({movie}: MovieCardProps){
                         )}
                     aria-pressed={isBookmarked}
                     aria-label={`${movie.title} 즐겨찾기`}
-                    onClick={()=>toggleBookmark(movie.id)}>
+                    disabled={toggleMutation.isPending}
+                    onClick={handleToggleBookmark}>
                     <img
                         className="size-6 invert"
                         src={isBookmarked
