@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFavorite } from "../../api/favorites/get-favorite";
 import { addFavorite } from "../../api/favorites/add-favorite";
@@ -7,7 +9,8 @@ import { createRating } from "../../api/ratings/create-ratings";
 import { updateRating } from "../../api/ratings/update-ratings";
 import { deleteRating } from "../../api/ratings/delete-ratings";
 import { useAuthStore } from "../../stores/auth-store";
-import { Link, useParams } from "@tanstack/react-router";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { useState } from "react";
 
@@ -70,9 +73,7 @@ function RatingStars({
 }
 
 export function MovieDetailPage() {
-  const { movieId: movieIdParam } = useParams({
-    from: "/movies/$movieId",
-  });
+  const { movieId: movieIdParam } = useParams<{ movieId: string }>();
 
   const movieId = Number(movieIdParam);
   const isValidMovieId = Number.isInteger(movieId) && movieId > 0;
@@ -166,7 +167,7 @@ export function MovieDetailPage() {
         <h1 className="text-xl font-bold text-[#111]">{statusMessage}</h1>
 
         <Link
-          to="/"
+          href="/"
           className="rounded-lg bg-[#2f5bea] px-5 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#2448c7]"
         >
           영화 목록으로 돌아가기
@@ -193,7 +194,7 @@ export function MovieDetailPage() {
 
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">
         <Link
-          to="/"
+          href="/"
           className="inline-flex items-center gap-2 rounded text-sm font-medium text-white/75 no-underline transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           <span aria-hidden="true">←</span>
@@ -225,7 +226,7 @@ export function MovieDetailPage() {
 
                 {memberId === null ? (
                   <Link
-                    to="/login"
+                    href="/login"
                     className="mt-5 inline-block text-sm underline"
                   >
                     로그인하고 즐겨찾기와 평점 남기기
