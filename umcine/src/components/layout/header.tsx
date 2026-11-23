@@ -3,6 +3,7 @@
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
+import {Suspense} from "react";
 import {favoriteQueries} from "../../api/favorites/favorite-queries.ts";
 import {memberQueries} from "../../api/members/member-queries.ts";
 import {ratingQueries} from "../../api/ratings/rating-queries.ts";
@@ -15,8 +16,42 @@ const NAV_ITEMS = [
     {href: "/mypage", label: "내 정보", exact: false},
 ] as const;
 
-export function Header() {
+// pathname이 null이면 현재 메뉴 표시 없이 링크만 그린다
+function NavLinks({pathname}: { pathname: string | null }) {
+    return (
+        <nav className="flex items-center gap-4 whitespace-nowrap md:gap-[30px]">
+            {NAV_ITEMS.map(({href, label, exact}) => {
+                // TanStack Router의 activeProps 대신 현재 경로를 직접 비교한다
+                const isActive = pathname !== null && (exact ? pathname === href : pathname.startsWith(href));
+
+                return (
+                    <Link
+                        key={href}
+                        href={href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                            "text-sm font-bold",
+                            isActive
+                                ? "text-(--color-text-primary) underline"
+                                : "text-(--color-text-secondary) no-underline",
+                        )}
+                    >
+                        {label}
+                    </Link>
+                );
+            })}
+        </nav>
+    );
+}
+
+// usePathname은 /movies/[movieId]처럼 요청 때 정해지는 경로에서 미리 렌더링할 수 없어서
+// 이 부분만 Suspense로 감싼다(cacheComponents)
+function ActiveNavLinks() {
     const pathname = usePathname();
+    return <NavLinks pathname={pathname}/>;
+}
+
+export function Header() {
     const hasHydrated = useAuthStore((state) => state.hasHydrated);
     const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
     const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -41,28 +76,9 @@ export function Header() {
                     </span>
                     <span className="text-xl font-black tracking-[-0.7px]">UMCine</span>
                 </div>
-                <nav className="flex items-center gap-4 whitespace-nowrap md:gap-[30px]">
-                    {NAV_ITEMS.map(({href, label, exact}) => {
-                        // TanStack Router의 activeProps 대신 현재 경로를 직접 비교한다
-                        const isActive = exact ? pathname === href : pathname.startsWith(href);
-
-                        return (
-                            <Link
-                                key={href}
-                                href={href}
-                                aria-current={isActive ? "page" : undefined}
-                                className={cn(
-                                    "text-sm font-bold",
-                                    isActive
-                                        ? "text-(--color-text-primary) underline"
-                                        : "text-(--color-text-secondary) no-underline",
-                                )}
-                            >
-                                {label}
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <Suspense fallback={<NavLinks pathname={null}/>}>
+                    <ActiveNavLinks/>
+                </Suspense>
             </div>
 
             <div className="flex items-center gap-2.5">
