@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {Link} from "@tanstack/react-router";
+import Link from "next/link";
 import {ratingQueries} from "../../api/ratings/rating-queries.ts";
 import type {Rating} from "../../api/ratings/ratings.ts";
 import {useDeleteRatingMutation} from "../../hooks/use-delete-rating-mutation.ts";
@@ -33,7 +33,7 @@ export function MyRating({movieId}: MyRatingProps) {
 
             {memberId === null ? (
                 <p className={MESSAGE_CLASS}>
-                    <Link to="/login" className="font-bold underline">로그인</Link>하면 평점을 남길 수 있어요.
+                    <Link href="/login" className="font-bold underline">로그인</Link>하면 평점을 남길 수 있어요.
                 </p>
             ) : ratingQuery.isPending ? (
                 <p className={MESSAGE_CLASS}>내 평점을 불러오는 중이에요.</p>

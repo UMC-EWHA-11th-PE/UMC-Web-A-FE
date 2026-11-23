@@ -1,13 +1,20 @@
-import {Link, useNavigate, useSearch} from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import {useRouter} from "next/navigation";
 import {type SubmitEvent, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
 import Footer from "../../components/layout/footer";
 import {getTmdbPosterUrl} from "../../utils/movies/tmdb-image";
 import {movieQueries} from "../../api/movies/movie-queries.ts";
 
-export function SearchPage() {
-    const {query} = useSearch({from: "/search"});
-    const navigate = useNavigate({from: "/search"});
+interface SearchPageProps {
+    query?: string;
+}
+
+// query는 page.tsx(서버)가 searchParams에서 읽어 넘겨준다
+export function SearchPage({query}: SearchPageProps) {
+    const router = useRouter();
     const [searchText, setSearchText] = useState(query ?? "");
     const [prevQuery, setPrevQuery] = useState(query);
 
@@ -26,9 +33,7 @@ export function SearchPage() {
     function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         const nextQuery = searchText.trim();
-        navigate({
-            search: nextQuery ? {query: nextQuery} : {},
-        });
+        router.push(nextQuery ? `/search?${new URLSearchParams({query: nextQuery})}` : "/search");
     }
 
     if (!normalizedQuery) {
@@ -122,8 +127,7 @@ export function SearchPage() {
                                 <li key={movie.id}
                                     className="flex items-start gap-[18px] border-b border-(--color-border-default) py-5">
                                     <Link
-                                        to="/movies/$movieId"
-                                        params={{movieId: String(movie.id)}}
+                                        href={`/movies/${movie.id}`}
                                         className="h-[190px] w-[126px] shrink-0 overflow-hidden rounded-[10px] bg-(--color-bg-page)"
                                     >
                                         {posterUrl ? (
@@ -145,8 +149,7 @@ export function SearchPage() {
                                             {movie.overview}
                                         </p>
                                         <Link
-                                            to="/movies/$movieId"
-                                            params={{movieId: String(movie.id)}}
+                                            href={`/movies/${movie.id}`}
                                             className="flex items-center gap-1 self-start text-xs font-extrabold leading-[normal] text-(--color-action-primary)"
                                         >
                                             상세 보기

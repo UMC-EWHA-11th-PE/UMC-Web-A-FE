@@ -1,7 +1,9 @@
+"use client";
+
 import {useState} from "react";
 import {checkEmailDuplicate} from "../../api/members/check-email-duplicate.ts";
 import {checkNicknameDuplicate} from "../../api/members/check-nickname-duplicate.ts";
-import {Link} from "@tanstack/react-router";
+import Link from "next/link";
 import {useSignupMutation} from "../../hooks/use-signup-mutation.ts";
 
 // 이메일 형식 검사
@@ -253,7 +255,7 @@ export function SignupPage() {
                 <div className="flex items-end justify-center">
                     <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">이미 계정이
                         있나요? </p>
-                    <Link to="/login"
+                    <Link href="/login"
                           className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">로그인</Link>
                 </div>
             </form>

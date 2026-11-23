@@ -1,3 +1,5 @@
+"use client";
+
 import MovieGrid from "../../components/movies/movie-grid.tsx";
 import Footer from "../../components/layout/footer.tsx";
 import Pagination from "../../components/movies/pagination.tsx";

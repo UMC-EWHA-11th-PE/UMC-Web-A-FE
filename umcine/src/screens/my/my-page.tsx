@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";

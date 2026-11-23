@@ -1,4 +1,6 @@
-import {Link, useParams} from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import Footer from "../../components/layout/footer.tsx";
 import {BookmarkButton} from "../../components/bookmark-button.tsx";
 import {getTmdbBackdropUrl, getTmdbPosterUrl} from "../../utils/movies/tmdb-image";
@@ -14,8 +16,12 @@ function formatRuntime(runtime: number | null) {
     return hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
 }
 
-export function MovieDetailPage() {
-    const {movieId} = useParams({from: "/movies/$movieId"});
+interface MovieDetailPageProps {
+    movieId: string;
+}
+
+// movieId는 page.tsx(서버)가 params에서 읽어 넘겨준다
+export function MovieDetailPage({movieId}: MovieDetailPageProps) {
     const isDecimalId = /^\d+$/.test(movieId);
     const parsedMovieId = isDecimalId ? Number(movieId) : NaN;
     const isValidMovieId = Number.isSafeInteger(parsedMovieId) && parsedMovieId > 0;
@@ -57,7 +63,7 @@ export function MovieDetailPage() {
                 )}
                 <div
                     className="absolute inset-0 flex flex-col justify-between items-start px-4 py-6 md:px-20 text-(--color-bg-surface)">
-                    <Link className="flex items-center gap-1 text-[13px] font-bold" to="/">
+                    <Link className="flex items-center gap-1 text-[13px] font-bold" href="/">
                         <img className="size-6 invert" src="/icons/movie-icons/chevron-left.svg" alt=""/>
                         영화 목록
                     </Link>

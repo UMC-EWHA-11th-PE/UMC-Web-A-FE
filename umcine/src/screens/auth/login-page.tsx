@@ -1,5 +1,7 @@
+"use client";
+
 import {useState} from "react";
-import {Link} from "@tanstack/react-router";
+import Link from "next/link";
 import {getApiErrorMessage} from "../../utils/get-api-error-message.ts";
 import {useLoginMutation} from "../../hooks/use-login-mutation.ts";
 
@@ -92,7 +94,7 @@ export function LoginPage() {
                 <div className="flex items-end justify-center">
                     <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">아직 계정이
                         없나요? </p>
-                    <Link to="/signup"
+                    <Link href="/signup"
                           className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">회원가입</Link>
                 </div>
             </form>
