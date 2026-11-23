@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";
 import { memberQueries } from "../../api/members/member-queries.ts";
-import { updateMyInfo } from "../../api/members/my-info.ts";
 import Footer from "../../components/layout/footer.tsx";
 import { useAuthStore } from "../../stores/auth-store.ts";
 import { cn } from "../../utils/cn.ts";
 import { getApiErrorMessage } from "../../utils/get-api-error-message.ts";
 import { FavoriteMovies } from "./favorite-movies.tsx";
+import {useUpdateMyInfoMutation} from "../../hooks/use-update-my-info-mutation.ts";
 
 const PAGE_TITLE_CLASS = "text-[31px] font-bold leading-[normal] tracking-[-1.24px]";
 const INFO_LABEL_CLASS = "text-[11px] leading-[normal] text-(--color-text-tertiary)";
@@ -33,24 +32,12 @@ function Avatar() {
 
 export function MyPage() {
     const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
-    const queryClient = useQueryClient();
     const myInfoQuery = useQuery(memberQueries.me(isLoggedIn));
 
     const [isEditing, setIsEditing] = useState(false);
     const [nickname, setNickname] = useState("");
-
-    const updateMutation = useMutation({
-        mutationFn: updateMyInfo,
-        onSuccess: (myInfo) => {
-            queryClient.setQueryData(memberQueries.me(isLoggedIn).queryKey, myInfo);
-            setIsEditing(false);
-        },
-    });
+    const updateMutation=useUpdateMyInfoMutation();
     const nicknameCheckMutation = useMutation({ mutationFn: checkNicknameDuplicate });
-
-    if (!isLoggedIn) {
-        return <Navigate to="/login" replace />;
-    }
 
     if (myInfoQuery.isPending) {
         return <main className={STATUS_CLASS}>내 정보를 불러오는 중이에요.</main>;
@@ -90,7 +77,10 @@ export function MyPage() {
         e.preventDefault();
         if (!canSave) return;
 
-        updateMutation.mutate({ nickname: trimmedNickname });
+        updateMutation.mutate(
+            { nickname: trimmedNickname },
+            { onSuccess: () => setIsEditing(false) },
+        );
     };
 
     if (isEditing) {
@@ -109,7 +99,9 @@ export function MyPage() {
                                     onClick={() => setIsEditing(false)}>
                                 취소
                             </button>
-                            <button type="submit" disabled={!canSave} className={PRIMARY_BUTTON_CLASS}>변경사항 저장</button>
+                            <button type="submit" disabled={!canSave} className={PRIMARY_BUTTON_CLASS}>
+                                {updateMutation.isPending ? "저장 중" : "변경사항 저장"}
+                            </button>
                         </div>
                     </div>
 

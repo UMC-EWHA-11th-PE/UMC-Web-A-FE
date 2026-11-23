@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { checkEmailDuplicate } from "../../api/members/check-email-duplicate.ts";
-import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate.ts";
-import { signup } from "../../api/members/signup.ts";
-import {Link, useNavigate} from "@tanstack/react-router";
+import {useState} from "react";
+import {checkEmailDuplicate} from "../../api/members/check-email-duplicate.ts";
+import {checkNicknameDuplicate} from "../../api/members/check-nickname-duplicate.ts";
+import {Link} from "@tanstack/react-router";
+import {useSignupMutation} from "../../hooks/use-signup-mutation.ts";
 
 // 이메일 형식 검사
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,13 +60,13 @@ export function SignupPage() {
         form.passwordConfirm.length > 0 && form.password === form.passwordConfirm;
 
     // 모든 입력값이 유효한지 확인
-    const isFormValid=
+    const isFormValid =
         isEmailValid &&
         isNicknameValid &&
         isPasswordValid &&
         isPasswordConfirmValid;
 
-    const canSubmit=
+    const canSubmit =
         isFormValid &&
         duplicateCheck.email.isAvailable &&
         duplicateCheck.nickname.isAvailable;
@@ -79,21 +79,21 @@ export function SignupPage() {
         form.passwordConfirm.length > 0 && !isPasswordConfirmValid;
 
     const handleChangeField = (key: DefaultFormKey, value: DefaultFormValue) => {
-        if(key==="email"||key==="nickname"){
+        if (key === "email" || key === "nickname") {
             if (duplicateCheck[key].isChecking) return;
-            setDuplicateCheck((prev)=>({...prev, [key]: DEFAULT_DUPLICATE_CHECK}));
+            setDuplicateCheck((prev) => ({...prev, [key]: DEFAULT_DUPLICATE_CHECK}));
         }
-        setForm((prev) => ({ ...prev, [key]: value }));
+        setForm((prev) => ({...prev, [key]: value}));
     };
 
     const handleCheckDuplicate = async (key: DuplicateCheckKey) => {
-        const isValid=key==="email"?isEmailValid:isNicknameValid;
-        if(!isValid||duplicateCheck[key].isChecking) return;
+        const isValid = key === "email" ? isEmailValid : isNicknameValid;
+        if (!isValid || duplicateCheck[key].isChecking) return;
 
-        const label=key==="email"?"이메일":"닉네임";
+        const label = key === "email" ? "이메일" : "닉네임";
         setDuplicateCheck((prev) => ({
             ...prev,
-            [key]: { isChecking: true, isAvailable: false },
+            [key]: {isChecking: true, isAvailable: false},
         }));
 
         try {
@@ -104,7 +104,7 @@ export function SignupPage() {
             const isAvailable = response.available;
             setDuplicateCheck((prev) => ({
                 ...prev,
-                [key]: { ...prev[key], isAvailable },
+                [key]: {...prev[key], isAvailable},
             }));
             alert(
                 isAvailable
@@ -114,45 +114,30 @@ export function SignupPage() {
         } catch {
             setDuplicateCheck((prev) => ({
                 ...prev,
-                [key]: { ...prev[key], isAvailable: false },
+                [key]: {...prev[key], isAvailable: false},
             }));
             alert("중복 확인에 실패했어요. 다시 시도해 주세요.");
         } finally {
             setDuplicateCheck((prev) => ({
                 ...prev,
-                [key]: { ...prev[key], isChecking: false },
+                [key]: {...prev[key], isChecking: false},
             }));
         }
     };
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const signupMutation = useSignupMutation();
 
-    const navigate=useNavigate();
-
-    const handleSubmit = async (e:React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         // 폼 제출 시 페이지 새로고침 방지
-        e.preventDefault()
-        if(!canSubmit || isSubmitting) return;
+        event.preventDefault()
 
-        setIsSubmitting(true);
+        if (!canSubmit || signupMutation.isPending) return;
 
-        try{
-            const response = await signup({
-                email: form.email.trim(),
-                nickname: form.nickname.trim(),
-                password: form.password,
-            });
-
-            alert(response.message);
-
-            if(response.isSuccess){
-                void navigate({to:"/login"});
-            }
-        } catch {
-            alert("회원가입에 실패했어요. 다시 시도해 주세요.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        signupMutation.mutate({
+            email: form.email.trim(),
+            nickname: form.nickname.trim(),
+            password: form.password,
+        })
     };
 
     // noValidate는 폼 제출 시 브라우저의 기본 유효성 검사를 끔
@@ -175,15 +160,15 @@ export function SignupPage() {
                                 placeholder="name@example.com"
                                 className={INPUT_CLASS}
                                 value={form.email}
-                                onChange={(e)=>handleChangeField("email", e.target.value)}
+                                onChange={(e) => handleChangeField("email", e.target.value)}
                             />
                             <button
                                 type="button"
                                 className={CHECK_BUTTON_CLASS}
-                                onClick={()=>handleCheckDuplicate("email")}
-                                disabled={!isEmailValid||duplicateCheck.email.isChecking}
+                                onClick={() => handleCheckDuplicate("email")}
+                                disabled={!isEmailValid || duplicateCheck.email.isChecking}
                             >
-                                {duplicateCheck.email.isChecking?"확인 중":"중복 확인"}
+                                {duplicateCheck.email.isChecking ? "확인 중" : "중복 확인"}
                             </button>
                         </div>
                     </div>
@@ -201,15 +186,15 @@ export function SignupPage() {
                                 placeholder="2–12자"
                                 className={INPUT_CLASS}
                                 value={form.nickname}
-                                onChange={(e)=>handleChangeField("nickname", e.target.value)}
+                                onChange={(e) => handleChangeField("nickname", e.target.value)}
                             />
                             <button
                                 type="button"
                                 className={CHECK_BUTTON_CLASS}
-                                onClick={()=>handleCheckDuplicate("nickname")}
-                                disabled={!isNicknameValid||duplicateCheck.nickname.isChecking}
+                                onClick={() => handleCheckDuplicate("nickname")}
+                                disabled={!isNicknameValid || duplicateCheck.nickname.isChecking}
                             >
-                                {duplicateCheck.nickname.isChecking?"확인 중":"중복 확인"}
+                                {duplicateCheck.nickname.isChecking ? "확인 중" : "중복 확인"}
                             </button>
                         </div>
                     </div>
@@ -226,7 +211,7 @@ export function SignupPage() {
                                 placeholder="8자 이상"
                                 className={INPUT_CLASS}
                                 value={form.password}
-                                onChange={(e)=>handleChangeField("password", e.target.value)}
+                                onChange={(e) => handleChangeField("password", e.target.value)}
                             />
                         </div>
                     </div>
@@ -250,7 +235,7 @@ export function SignupPage() {
                                 placeholder="다시 입력"
                                 className={INPUT_CLASS}
                                 value={form.passwordConfirm}
-                                onChange={(e)=>handleChangeField("passwordConfirm", e.target.value)}
+                                onChange={(e) => handleChangeField("passwordConfirm", e.target.value)}
                             />
                         </div>
                     </div>
@@ -259,15 +244,17 @@ export function SignupPage() {
 
                 <button
                     type="submit"
-                    disabled={!canSubmit || isSubmitting}
+                    disabled={!canSubmit || signupMutation.isPending}
                     className="flex h-12 items-center justify-center rounded-lg border border-(--color-bg-surface) bg-(--color-action-primary) px-4 text-sm font-extrabold leading-[normal] text-(--color-bg-surface) hover:bg-(--color-action-hover) active:bg-(--color-action-pressed) disabled:cursor-not-allowed disabled:bg-(--color-action-disabled)"
                 >
-                    가입하기
+                    {signupMutation.isPending ? "가입 중" : "가입하기"}
                 </button>
 
                 <div className="flex items-end justify-center">
-                    <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">이미 계정이 있나요? </p>
-                    <Link to="/login" className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">로그인</Link>
+                    <p className="whitespace-pre text-[13px] leading-[normal] text-(--color-text-secondary)">이미 계정이
+                        있나요? </p>
+                    <Link to="/login"
+                          className="text-xs font-extrabold leading-[normal] text-(--color-action-primary)">로그인</Link>
                 </div>
             </form>
         </main>

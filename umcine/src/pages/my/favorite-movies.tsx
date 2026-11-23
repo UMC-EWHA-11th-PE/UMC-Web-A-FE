@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { favoriteQueries } from "../../api/favorites/favorite-queries.ts";
 import { movieQueries } from "../../api/movies/movie-queries.ts";
 import MovieCard from "../../components/movies/movie-card.tsx";
 import Pagination from "../../components/movies/pagination.tsx";
-import { useBookmarkStore } from "../../stores/bookmark-store.ts";
+import { getApiErrorMessage } from "../../utils/get-api-error-message.ts";
 
 const PAGE_SIZE = 5;
 const MESSAGE_CLASS = "py-10 text-center text-sm text-(--color-text-secondary)";
 
 export function FavoriteMovies() {
-    const bookmarkedMovieIds = useBookmarkStore((state) => state.bookmarkedMovieIds);
+    const favoritesQuery = useQuery(favoriteQueries.list(true));
+    const bookmarkedMovieIds = favoritesQuery.data?.map((favorite) => favorite.movieId) ?? [];
     const [page, setPage] = useState(1);
 
     const totalPages = Math.max(1, Math.ceil(bookmarkedMovieIds.length / PAGE_SIZE));
@@ -34,7 +36,13 @@ export function FavoriteMovies() {
         <section className="flex flex-col gap-4">
             <h2 className="text-[17px] font-bold leading-[normal]">내 즐겨찾기</h2>
 
-            {bookmarkedMovieIds.length === 0 ? (
+            {favoritesQuery.isPending ? (
+                <p className={MESSAGE_CLASS}>즐겨찾기 목록을 불러오는 중이에요.</p>
+            ) : favoritesQuery.isError ? (
+                <p className={MESSAGE_CLASS}>
+                    {getApiErrorMessage(favoritesQuery.error, "즐겨찾기 목록을 불러오지 못했어요.")}
+                </p>
+            ) : bookmarkedMovieIds.length === 0 ? (
                 <p className={MESSAGE_CLASS}>아직 즐겨찾기한 영화가 없어요.</p>
             ) : (
                 <>
