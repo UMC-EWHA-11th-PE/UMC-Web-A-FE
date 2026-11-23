@@ -2,10 +2,14 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { BookmarkButton } from "../../components/bookmark-button";
+import { RatingForm } from "../../components/rating-form";
+
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { getTmdbPosterUrl, getTmdbBackdropUrl } from "../../utils/movies/tmdb-image";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
 
+import { useAuthStore } from "../../stores/auth-store";
+import { useRatingQuery } from "../../hooks/use-ratings-query";
 
 export function MovieDetailPage() {
 
@@ -20,6 +24,13 @@ export function MovieDetailPage() {
 		staleTime: 30 * 1000,
 	})
 
+
+	const memberId = useAuthStore((state) => state.memberId)
+
+	const ratingQuery = useRatingQuery(memberId);
+	const myRating = ratingQuery.data?.find(
+		(rating) => rating.movieId === movieId
+	);
 
 	return (
 		<>
@@ -88,28 +99,23 @@ export function MovieDetailPage() {
 						</div>
 
 
-						<div className="w-[390px] h-[294px] ml-1 pb-[41px] pl-[30px] gap-2 font-['Font_5'] border-l border-[#E3E6EB]">
-							<h2 className="font-bold text-[21px] align-middle text-[#17191E]">내 평점</h2>
-							<p className="font-regular text-[12px] align-middle text-[#969DA8]">별점은 필수, 후기는 선택이에요.</p>
-
-							<div className="flex flex-row items-start w-auto h-8 gap-1">
-								<img src="/icons/star-outline.svg" className="w-[38px] h-[38px] px-[6px] py-[1px] rounded-[8px] border border-[#E3E6EB]" />
-								<img src="/icons/star-outline.svg" className="w-[38px] h-[38px] px-[6px] py-[1px] rounded-[8px] border border-[#E3E6EB]"/>
-								<img src="/icons/star-outline.svg" className="w-[38px] h-[38px] px-[6px] py-[1px] rounded-[8px] border border-[#E3E6EB]"/>
-								<img src="/icons/star-outline.svg" className="w-[38px] h-[38px] px-[6px] py-[1px] rounded-[8px] border border-[#E3E6EB]"/>
-								<img src="/icons/star-outline.svg" className="w-[38px] h-[38px] px-[6px] py-[1px] rounded-[8px] border border-[#E3E6EB]"/>
-							</div>
-
-							<textarea
-							className="w-full h-[102px] rounded-[8px] border pt-4 px-3 pb-[18px] bg-white border-[#E3E6EB] text-[13px] font-regular placeholder:text-[13px] mt-6" 
-							placeholder="영화를 보고 느낀 점을 남겨보세요."
-							/>
-
-							<button className="items-center w-full h-[42px] px-4 bg-[#17191E] border border-white text-[14px] text-white font-extrabold align-middle rounded-[8px]">
-							평점 저장
-							</button>
-
-						</div>
+						{!memberId ? (
+								<RatingForm
+										memberId={null}
+										movieId={movieId}
+								/>
+						) : ratingQuery.isPending ? (
+								<p>평점을 불러오는 중이에요.</p>
+						) : ratingQuery.isError ? (
+								<p>평점을 불러오지 못했어요.</p>
+						) : (
+								<RatingForm
+										key={myRating?.ratingId ?? `new-${movieId}`}
+										memberId={memberId}
+										movieId={movieId}
+										initialRating={myRating}
+								/>
+						)}
 
 					</div>
 				</main>
@@ -120,3 +126,4 @@ export function MovieDetailPage() {
 		</>
 	)
 }
+
