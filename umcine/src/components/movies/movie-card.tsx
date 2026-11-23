@@ -4,8 +4,6 @@ import type { TmdbMovieListItem } from "../../api/movies/models";
 import { BookmarkButton } from "../bookmark-button";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
-
-
 interface MovieCardProps {
   movie: TmdbMovieListItem; 
   isBookmarked: boolean;
