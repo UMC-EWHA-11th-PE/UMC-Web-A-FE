@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { checkNicknameDuplicate } from "@/api/members/check-nickname-duplicate";
 
@@ -31,15 +32,10 @@ export function EditProfilePage({
   const [actionMessage, setActionMessage] = useState("");
 
   useEffect(() => {
-    if (!profileImage) {
-      setPreviewUrl(null);
-      return;
-    }
+    if (!previewUrl) return;
 
-    const url = URL.createObjectURL(profileImage);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [profileImage]);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const nextNickname = draftNickname.trim();
   const nicknameChanged = nextNickname !== nickname.trim();
@@ -86,6 +82,7 @@ export function EditProfilePage({
     try {
       await onSave({ nickname: nextNickname, profileImage });
       setProfileImage(null);
+      setPreviewUrl(null);
       setActionMessage("변경사항을 저장했어요.");
     } catch {
       setActionMessage("저장에 실패했어요. 다시 시도해 주세요.");
@@ -172,6 +169,7 @@ export function EditProfilePage({
 
                   setImageError("");
                   setProfileImage(file);
+                  setPreviewUrl(URL.createObjectURL(file));
                 }}
               />
               <img

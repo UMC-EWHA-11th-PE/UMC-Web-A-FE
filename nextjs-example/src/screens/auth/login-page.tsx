@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+import Link from "next/link";
 import { useLoginMutation } from "@/hooks/use-login-mutation";
 import { useState } from "react";
 
@@ -77,7 +78,7 @@ export function LoginPage() {
             처음이신가요?
           </p>
           <Link
-            to="/signup"
+            href="/signup"
             className="font-extrabold text-[12px] text-[#2563EB] "
           >
             회원가입

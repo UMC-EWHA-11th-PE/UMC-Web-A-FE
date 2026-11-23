@@ -20,6 +20,7 @@ export const useBookmarkStore = create<BookmarkStore>()(
 
     {
       name: "umcine-bookmark-store",
+      skipHydration: true,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         bookmarkedMovieIds: state.bookmarkedMovieIds,

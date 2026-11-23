@@ -1,14 +1,23 @@
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+"use client";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { searchMovies } from "../../api/movies/search-movies";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
 export function SearchPage() {
-  const { query } = useSearch({ from: "/search" });
-  const navigate = useNavigate({ from: "/search" });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const query = searchParams.get("query") ?? "";
 
-  const [searchText, setSearchText] = useState(query ?? "");
+  const [searchText, setSearchText] = useState(query);
+  const [previousQuery, setPreviousQuery] = useState(query);
+
+  if (query !== previousQuery) {
+    setPreviousQuery(query);
+    setSearchText(query);
+  }
   const normalizedQuery = query?.trim() ?? "";
 
   const searchQuery = useQuery({
@@ -19,17 +28,13 @@ export function SearchPage() {
 
   const searchResults = searchQuery.data?.results ?? [];
 
-  useEffect(() => {
-    setSearchText(query ?? "");
-  }, [query]);
-
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextQuery = searchText.trim();
 
-    navigate({
-      search: nextQuery ? { query: nextQuery } : {},
-    });
+    router.push(
+      nextQuery ? `/search?query=${encodeURIComponent(nextQuery)}` : "/search",
+    );
   }
 
   return (
@@ -100,8 +105,7 @@ export function SearchPage() {
                 {searchResults.map((movie) => (
                   <li key={movie.id}>
                     <Link
-                      to="/movies/$movieId"
-                      params={{ movieId: String(movie.id) }}
+                      href={`/movies/${movie.id}`}
                       className="group flex h-60 gap-4 rounded-xl border border-[#e5e5e5] bg-white p-4 no-underline transition hover:border-[#2f5bea]/40 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f5bea] sm:gap-6 sm:p-5"
                     >
                       <img

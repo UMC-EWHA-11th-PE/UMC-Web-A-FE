@@ -1,10 +1,11 @@
+"use client";
 import {
   useMutation,
   useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { deleteFavorite } from "../../api/favorites/delete-favorite";
 import { getFavorites } from "../../api/favorites/get-favorites";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
@@ -48,7 +49,7 @@ export function ViewProfilePage() {
         <div className="flex flex-row justify-between items-center w-full my-5">
           <h1 className="text-[31px] font-bold">내 정보</h1>
           <Link
-            to="/my-edit"
+            href="/my-edit"
             className="mr-22 inline-flex h-[42px] items-center justify-center rounded-[8px] border border-white bg-[#2563EB] px-4 text-[14px] font-bold text-white"
           >
             정보 수정
@@ -112,8 +113,7 @@ export function ViewProfilePage() {
                   className="overflow-hidden rounded-lg border border-[#E3E6EB]"
                 >
                   <Link
-                    to="/movies/$movieId"
-                    params={{ movieId: String(movieId) }}
+                    href={`/movies/${movieId}`}
                     className="block text-inherit no-underline"
                   >
                     {movie?.poster_path ? (

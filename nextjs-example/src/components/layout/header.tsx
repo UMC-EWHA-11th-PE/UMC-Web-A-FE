@@ -1,78 +1,72 @@
-import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { getMe } from "../../api/members/me";
-import { useAuthStore } from "../../stores/auth-store";
-import search from "../../assets/search.svg";
+"use client";
 
-function Header() {
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/auth-store";
+
+export default function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const accessToken = useAuthStore((state) => state.accessToken);
-  const meQuery = useQuery({
-    queryKey: ["members", "me"],
-    queryFn: getMe,
-    enabled: Boolean(accessToken),
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+
+  async function handleLogout() {
+    useAuthStore.getState().setAccessToken(null);
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    router.replace("/login");
+  }
+
   return (
-    <header className="flex items-center justify-between border-b border-[#e5e5e5] bg-white px-8 py-4">
-      <div className="flex items-center gap-8">
-        <Link
-          to="/"
-          className="flex items-center gap-1.5 text-lg font-bold text-[#111] no-underline"
-        >
-          영화
+    <header className="flex items-center justify-between border-b border-[#e5e5e5] bg-white px-6 py-4">
+      <nav className="flex items-center gap-6">
+        <Link href="/" className="text-lg font-bold">
+          UMCine
         </Link>
 
-        <Link to="/search" className="pb-0.5 text-sm text-[#555] no-underline">
+        <Link href="/search" className="text-sm text-[#555]">
           검색
         </Link>
 
-        <nav className="flex gap-5">
-          <Link
-            to="/my"
-            className="pb-0.5 text-sm text-[#555] no-underline"
-            activeProps={{
-              className: "border-b-2 border-[#111] !font-semibold !text-[#111]",
-            }}
-          >
-            내정보
-          </Link>
-        </nav>
-      </div>
+        <Link
+          href="/my"
+          className={`text-sm ${
+            pathname.startsWith("/my")
+              ? "border-b-2 border-black font-semibold"
+              : "text-[#555]"
+          }`}
+        >
+          내 정보
+        </Link>
+      </nav>
 
       <div className="flex items-center gap-3">
-        <Link
-          to="/search"
-          aria-label="검색"
-          className="grid h-9 w-9 place-items-center rounded-full border border-[#ddd] bg-white"
-        >
-          <img src={search} alt="" className="h-5 w-5" />
-        </Link>
-
-        {!accessToken ? (
-          <Link
-            to="/login"
-            className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white no-underline"
-          >
-            로그인
-          </Link>
-        ) : meQuery.isLoading ? (
-          <span
-            className="h-10 w-24 animate-pulse rounded-lg bg-gray-200"
-            role="status"
-            aria-label="내 정보 불러오는 중"
-          />
+        {!hasHydrated ? (
+          <span className="h-9 w-20 animate-pulse rounded bg-gray-200" />
+        ) : accessToken ? (
+          <>
+            <Link href="/my" className="text-sm font-semibold text-blue-600">
+              마이페이지
+            </Link>
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              className="rounded-md border px-3 py-2 text-sm"
+            >
+              로그아웃
+            </button>
+          </>
         ) : (
           <Link
-            to="/my"
-            className="rounded-md border border-[#2f5bea] bg-white px-4 py-2 text-sm font-semibold text-[#2f5bea] no-underline"
+            href="/login"
+            className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white"
           >
-            마이페이지
+            로그인
           </Link>
         )}
       </div>
     </header>
   );
 }
-
-export default Header;
