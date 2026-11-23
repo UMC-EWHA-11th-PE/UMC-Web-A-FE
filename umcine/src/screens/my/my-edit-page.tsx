@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
 import type { MemberInfo } from "../../api/members/me";
 import { FormField, InputBox } from "../../components/auth/form-field";
@@ -31,7 +33,7 @@ function MyEditForm({ me }: { me: MemberInfo }) {
   const storedProfileImage = useProfileStore((state) => state.profileImage);
   const setStoredProfileImage = useProfileStore((state) => state.setProfileImage);
   const updateMeMutation = useUpdateMeMutation();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // 서버의 닉네임으로 시작해서, 저장 버튼을 누르기 전까지는 화면 안에서만 바뀜
   const [nickname, setNickname] = useState(me.nickname);
@@ -94,7 +96,7 @@ function MyEditForm({ me }: { me: MemberInfo }) {
     // 프로필 이미지는 브라우저에 저장하고 내 정보 화면으로 돌아감
     const finish = () => {
       setStoredProfileImage(profileImage);
-      navigate({ to: "/my" });
+      router.push("/my");
     };
 
     // 닉네임을 바꾸지 않았으면 서버에 보낼 게 없음

@@ -1,4 +1,6 @@
-import { useNavigate, useSearch } from "@tanstack/react-router";
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, type SubmitEvent } from "react";
 import SearchForm from "../../components/movies/search-form";
@@ -6,8 +8,10 @@ import SearchResultCard from "../../components/movies/search-result-card";
 import { searchMovies } from "../../api/movies/search-movies";
 
 export function SearchPage() {
-  const { query } = useSearch({ from: "/search" });
-  const navigate = useNavigate({ from: "/search" });
+  // 주소의 ?query= 값을 읽는다. 없으면 undefined
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") ?? undefined;
+  const router = useRouter();
   const [searchText, setSearchText] = useState(query ?? "");
 
   useEffect(() => {
@@ -31,9 +35,7 @@ export function SearchPage() {
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextQuery = searchText.trim();
-    navigate({
-      search: nextQuery ? { query: nextQuery } : {},
-    });
+    router.push(nextQuery ? `/search?query=${encodeURIComponent(nextQuery)}` : "/search");
   }
 
   // 검색어가 없을 때: Figma "영화 검색" 화면 (위아래 여백 209px, 제목과 검색창 사이 36px)

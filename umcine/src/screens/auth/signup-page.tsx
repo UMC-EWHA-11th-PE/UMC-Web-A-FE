@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { checkEmailDuplicate } from "../../api/members/check-email-duplicate";
 import { checkNicknameDuplicate } from "../../api/members/check-nickname-duplicate";
 import { useSignupMutation } from "../../hooks/use-signup-mutation";
@@ -244,7 +246,7 @@ export function SignupPage() {
 
         <p className="text-center text-xs leading-4 text-fg-secondary">
           이미 계정이 있나요?{" "}
-          <Link to="/login" className="font-bold text-action">
+          <Link href="/login" className="font-bold text-action">
             로그인
           </Link>
         </p>

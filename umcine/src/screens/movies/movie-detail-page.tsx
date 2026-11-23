@@ -1,4 +1,6 @@
-import { Link, useParams } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import { RatingPanel } from "../../components/movies/rating-panel";
@@ -8,8 +10,8 @@ import { formatRuntime } from "../../utils/movies/format-runtime";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
 import { getTmdbBackdropUrl, getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
-export function MovieDetailPage() {
-  const { movieId } = useParams({ from: "/movies/$movieId" });
+// 주소의 영화 번호는 Server Component인 page.tsx가 읽어서 넘겨준다
+export function MovieDetailPage({ movieId }: { movieId: string }) {
   const parsedMovieId = Number(movieId);
   const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
 
@@ -63,7 +65,7 @@ export function MovieDetailPage() {
         <div className="absolute inset-0 bg-linear-to-t from-black/70 to-black/10" />
 
         <Link
-          to="/"
+          href="/"
           className="relative flex w-fit items-center gap-1 text-[13px] leading-4 font-bold text-white"
         >
           <svg

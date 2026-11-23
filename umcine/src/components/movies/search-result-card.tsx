@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 import { BookmarkButton } from "../bookmark-button";
@@ -16,8 +16,7 @@ export default function SearchResultCard({ movie }: SearchResultCardProps) {
       {/* 포스터: 126x190, radius 10px, 포스터가 없으면 같은 크기의 빈 영역 */}
       <div className="relative shrink-0">
         <Link
-          to="/movies/$movieId"
-          params={{ movieId: String(movie.id) }}
+          href={`/movies/${movie.id}`}
           className="block h-[190px] w-[126px] overflow-hidden rounded-[10px] bg-page"
         >
           {posterUrl ? (
@@ -53,8 +52,7 @@ export default function SearchResultCard({ movie }: SearchResultCardProps) {
 
         {/* arrow-right.svg는 24px 기준이라 contain으로 16px 안에 맞춰요. */}
         <Link
-          to="/movies/$movieId"
-          params={{ movieId: String(movie.id) }}
+          href={`/movies/${movie.id}`}
           className="inline-flex items-center gap-1 text-xs leading-[14px] font-extrabold text-action"
         >
           상세 보기

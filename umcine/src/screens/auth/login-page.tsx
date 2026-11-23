@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, type SubmitEvent } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { FormField, InputBox } from "../../components/auth/form-field";
 import { INPUT_CLASS_NAME } from "../../components/auth/form-field-styles";
 import { useLoginMutation } from "../../hooks/use-login-mutation";
@@ -85,7 +87,7 @@ export function LoginPage() {
 
         <p className="text-center text-xs leading-4 text-fg-secondary">
           계정이 없으신가요?{" "}
-          <Link to="/signup" className="font-bold text-action">
+          <Link href="/signup" className="font-bold text-action">
             회원가입
           </Link>
         </p>

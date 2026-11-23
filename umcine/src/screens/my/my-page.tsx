@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { getMovieDetail } from "../../api/movies/get-movie-detail";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import MovieGrid from "../../components/movies/movie-grid";
@@ -53,7 +55,7 @@ export function MyPage() {
           내 정보
         </h1>
         <Link
-          to="/my/edit"
+          href="/my/edit"
           className="flex h-[42px] items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
         >
           정보 수정

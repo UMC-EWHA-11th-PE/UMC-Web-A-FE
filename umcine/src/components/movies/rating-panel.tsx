@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { Rating } from "../../api/ratings/get-member-ratings";
 import { useCreateRatingMutation } from "../../hooks/use-create-rating-mutation";
 import { useDeleteRatingMutation } from "../../hooks/use-delete-rating-mutation";
@@ -27,7 +27,7 @@ export function RatingPanel({ movieId }: { movieId: number }) {
       {!accessToken ? (
         <p className="text-sm text-fg-secondary">
           로그인하면 평점을 남길 수 있어요.{" "}
-          <Link to="/login" className="font-bold text-action">
+          <Link href="/login" className="font-bold text-action">
             로그인
           </Link>
         </p>
