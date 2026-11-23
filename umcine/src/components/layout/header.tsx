@@ -1,16 +1,21 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "../../utils/cn";
+import { useMeQuery } from "../../hooks/use-me-query";
+import { useAuthStore } from "../../stores/auth-store";
 
 interface NavLinkProps {
-  to: "/" | "/search" | "/my";
+  href: "/" | "/search" | "/my";
   active: boolean;
   children: string;
 }
 
-function NavLink({ to, active, children }: NavLinkProps) {
+function NavLink({ href, active, children }: NavLinkProps) {
   return (
     <Link
-      to={to}
+      href={href}
       className={cn(
         "text-sm leading-none font-bold",
         active ? "text-fg" : "text-fg-secondary",
@@ -22,17 +27,20 @@ function NavLink({ to, active, children }: NavLinkProps) {
 }
 
 export default function Header() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const pathname = usePathname();
 
   // 영화 목록(/)과 영화 상세(/movies/...)는 "영화" 메뉴, 검색(/search)은 "검색" 메뉴가 활성 상태예요.
   const isMovieActive = pathname === "/" || pathname.startsWith("/movies");
   const isSearchActive = pathname.startsWith("/search");
   const isMyActive = pathname.startsWith("/my");
 
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const meQuery = useMeQuery();
+
   return (
     <header className="flex h-[91px] items-center justify-between border-b border-line bg-surface px-20 py-6">
       <div className="flex items-center gap-[42px]">
-        <Link to="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <span className="flex size-8 items-center justify-center rounded-lg border-2 border-fg">
             <img src="/icons/movie.svg" alt="" className="size-6" />
           </span>
@@ -41,14 +49,14 @@ export default function Header() {
           </span>
         </Link>
         <nav className="flex items-center gap-[30px]">
-          <NavLink to="/" active={isMovieActive}>영화</NavLink>
-          <NavLink to="/search" active={isSearchActive}>검색</NavLink>
-          <NavLink to="/my" active={isMyActive}>내 정보</NavLink>
+          <NavLink href="/" active={isMovieActive}>영화</NavLink>
+          <NavLink href="/search" active={isSearchActive}>검색</NavLink>
+          <NavLink href="/my" active={isMyActive}>내 정보</NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-2.5">
         <Link
-          to="/search"
+          href="/search"
           aria-label="검색"
           className="flex size-[42px] cursor-pointer items-center justify-center rounded-lg border border-line bg-surface"
         >
@@ -58,13 +66,22 @@ export default function Header() {
             className="size-6 bg-fg-secondary mask-[url('/icons/search.svg')] mask-center mask-no-repeat"
           />
         </Link>
-        <Link
-          to="/login"
-          className="flex h-[42px] cursor-pointer items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed"
-        >
-          로그인
-        </Link>
+        {/* 로그인 전: 로그인 링크 / 첫 조회 중: 버튼 크기의 로딩 표시 / 토큰이 있으면: 마이페이지 링크 */}
+        {!accessToken ? (
+          <Link href="/login" className={ACTION_LINK_CLASS_NAME}>
+            로그인
+          </Link>
+        ) : meQuery.isLoading ? (
+          <span aria-label="내 정보 불러오는 중" className="h-[42px] w-24 animate-pulse rounded-lg bg-line" />
+        ) : (
+          <Link href="/my" className={ACTION_LINK_CLASS_NAME}>
+            마이페이지
+          </Link>
+        )}
       </div>
     </header>
   );
 }
+
+const ACTION_LINK_CLASS_NAME =
+  "flex h-[42px] cursor-pointer items-center rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white hover:bg-action-hover active:bg-action-pressed";

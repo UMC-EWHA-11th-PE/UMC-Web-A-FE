@@ -1,0 +1,146 @@
+"use client";
+
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getMovieDetail } from "../../api/movies/get-movie-detail";
+import { RatingPanel } from "../../components/movies/rating-panel";
+import { useFavoriteStatusQuery } from "../../hooks/use-favorite-status-query";
+import { useToggleFavorite } from "../../hooks/use-toggle-favorite";
+import { formatRuntime } from "../../utils/movies/format-runtime";
+import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
+import { getTmdbBackdropUrl, getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
+
+// 주소의 영화 번호는 Server Component인 page.tsx가 읽어서 넘겨준다
+export function MovieDetailPage({ movieId }: { movieId: string }) {
+  const parsedMovieId = Number(movieId);
+  const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
+
+  // 영화 번호를 query key에 포함해, 영화마다 상세 정보를 따로 캐시한다
+  // 유효하지 않은 영화 번호는 요청하지 않는다 (훅은 조기 return보다 위에 둔다)
+  const movieDetailQuery = useQuery({
+    queryKey: ["movies", "detail", parsedMovieId],
+    queryFn: () => getMovieDetail(parsedMovieId),
+    enabled: isValidMovieId,
+    staleTime: 30 * 1000,
+  });
+
+  // 요청하지 않는 query도 isPending이 참일 수 있어서, 잘못된 번호를 로딩보다 먼저 처리한다
+  if (!isValidMovieId) {
+    return <main className="px-20 py-6">올바르지 않은 영화 번호예요.</main>;
+  }
+
+  if (movieDetailQuery.isPending) {
+    return <main className="px-20 py-6">영화 정보를 불러오는 중이에요.</main>;
+  }
+
+  if (movieDetailQuery.isError) {
+    return (
+      <main className="px-20 py-6">
+        {getMovieDetailErrorMessage(movieDetailQuery.error)}
+      </main>
+    );
+  }
+
+  const movie = movieDetailQuery.data;
+
+  const posterUrl = getTmdbPosterUrl(movie.poster_path);
+  const backdropUrl = getTmdbBackdropUrl(movie.backdrop_path);
+
+  return (
+    <main>
+      {/* 상단 배경: 높이 360px, 왼쪽 위 뒤로가기 / 왼쪽 아래 제목 */}
+      <section className="relative flex h-[360px] flex-col justify-between overflow-hidden px-20 py-6">
+        {backdropUrl ? (
+          <img
+            src={backdropUrl}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 size-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-page text-sm text-fg-tertiary">
+            이미지 없음
+          </div>
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 to-black/10" />
+
+        <Link
+          href="/"
+          className="relative flex w-fit items-center gap-1 text-[13px] leading-4 font-bold text-white"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          영화 목록
+        </Link>
+
+        <div className="relative flex flex-col gap-2 text-white">
+          <h1 className="text-[46px] leading-[50px] font-bold tracking-[-2.3px]">{movie.title}</h1>
+          <p className="text-sm leading-[17px]">{movie.original_title}</p>
+          <div className="flex items-center gap-2 text-[13px] leading-4 font-bold">
+            <span>{movie.release_date}</span>
+            <span>{movie.genres.map((genre) => genre.name).join(" · ")}</span>
+            <span>{formatRuntime(movie.runtime)}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 본문: 포스터 200px + 줄거리 + 평점 패널 360px, 간격 32px */}
+      <div className="flex items-start gap-8 px-20 py-6">
+        {posterUrl ? (
+          <img
+            src={posterUrl}
+            alt={`${movie.title} 포스터`}
+            className="h-[286px] w-[200px] shrink-0 rounded-[10px] bg-page object-cover shadow-[0_12px_30px_rgba(12,15,20,0.12)]"
+          />
+        ) : (
+          <div className="flex h-[286px] w-[200px] shrink-0 items-center justify-center rounded-[10px] bg-page text-sm text-fg-tertiary shadow-[0_12px_30px_rgba(12,15,20,0.12)]">
+            이미지 없음
+          </div>
+        )}
+
+        <section className="flex min-w-0 flex-1 flex-col items-start gap-3">
+          <h2 className="text-[21px] leading-[25px] font-bold tracking-[-0.63px] text-fg">
+            {movie.tagline}
+          </h2>
+          <p className="text-sm leading-6 text-fg-secondary">{movie.overview}</p>
+          <DetailBookmarkButton movieId={movie.id} />
+        </section>
+
+        <RatingPanel movieId={movie.id} />
+      </div>
+    </main>
+  );
+}
+
+function DetailBookmarkButton({ movieId }: { movieId: number }) {
+  const statusQuery = useFavoriteStatusQuery(movieId);
+  const isBookmarked = statusQuery.data?.favorited ?? false;
+  const { toggle, isPending } = useToggleFavorite(movieId, isBookmarked);
+
+  return (
+    <button
+      type="button"
+      aria-pressed={isBookmarked}
+      disabled={isPending || statusQuery.isLoading}
+      onClick={toggle}
+      className="inline-flex h-[42px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-white bg-action px-4 text-sm font-extrabold text-white disabled:cursor-not-allowed disabled:bg-action-disabled"
+    >
+      <img
+        src={isBookmarked ? "/icons/bookmark.svg" : "/icons/bookmark-outline.svg"}
+        alt=""
+        className="size-4 invert"
+      />
+      {isBookmarked ? "즐겨찾기 해제" : "즐겨찾기"}
+    </button>
+  );
+}
