@@ -18,6 +18,8 @@ export const useViewSettingsStore = create<ViewSettingsStore>()(
             name: "umcine-view-settings",
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({ cardSize: state.cardSize }),
+            // auth-store와 같은 이유로 마운트 뒤에 복원한다
+            skipHydration: true,
         },
     ),
 );
