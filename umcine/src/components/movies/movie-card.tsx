@@ -1,6 +1,9 @@
+"use client";
+
 import type {TmdbMovieListItem} from "../../api/movies/models.ts";
 import {useQuery} from "@tanstack/react-query";
-import {Link, useNavigate} from "@tanstack/react-router";
+import Link from "next/link";
+import {useRouter} from "next/navigation";
 import {favoriteQueries} from "../../api/favorites/favorite-queries.ts";
 import {useToggleFavoriteMutation} from "../../hooks/use-toggle-favorite-mutation.ts";
 import {useAuthStore} from "../../stores/auth-store.ts";
@@ -13,7 +16,7 @@ interface MovieCardProps{
 
 export default function MovieCard({movie}: MovieCardProps){
     const isLoggedIn = useAuthStore((state) => state.accessToken !== null);
-    const navigate = useNavigate();
+    const router = useRouter();
     // 카드마다 상태를 따로 요청하지 않고 즐겨찾기 목록 하나를 같이 쓴다
     const favoriteQuery = useQuery({
         ...favoriteQueries.list(isLoggedIn),
@@ -24,7 +27,7 @@ export default function MovieCard({movie}: MovieCardProps){
 
     const handleToggleBookmark = () => {
         if (!isLoggedIn) {
-            void navigate({to: "/login"});
+            router.push("/login");
             return;
         }
         toggleMutation.mutate(isBookmarked);
@@ -34,7 +37,7 @@ export default function MovieCard({movie}: MovieCardProps){
     return(
         <article className="flex flex-col items-start gap-1">
             <div className="relative aspect-2/3 overflow-hidden self-stretch rounded-[10px] bg-(--color-bg-page) xl:aspect-auto xl:h-[274px]">
-                <Link to="/movies/$movieId" params={{movieId:String(movie.id)}} className="block h-full">
+                <Link href={`/movies/${movie.id}`} className="block h-full">
                     {posterUrl ? (
                         <img className="h-full w-full object-cover"
                             src={posterUrl} alt={`${movie.title} 포스터`}/>
